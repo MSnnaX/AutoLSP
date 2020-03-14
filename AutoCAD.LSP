@@ -2,7 +2,8 @@
 (defun c:MC (/)
 	(command "ucs" "w")
 	(angset)
-	(setq	line1 (car (select-object "the fist line" "LINE"))
+	(setq	
+    line1 (car (select-object "the fist line" "LINE"))
 		tab1	(entget line1)
 		p1		(cdr (assoc 10 tab1))
 		p2		(cdr (assoc 11 tab1))
