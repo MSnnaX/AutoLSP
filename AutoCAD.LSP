@@ -1,6 +1,5 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun c:MC (/)
-	;(setierr)
 	(command "ucs" "w")
 	(angset)
 	(setq	line1 (car (select-object "the fist line" "LINE"))
@@ -36,7 +35,6 @@
 	(redraw line1 4)
 	(redraw line2 4)
 	(command "ucs" "p")
-	;(Reerr)
 	(princ)
 ) ;_ end of defun mc
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
