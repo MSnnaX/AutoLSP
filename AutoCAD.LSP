@@ -1,4 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun c:MC (/)
 	(command "ucs" "w")
 	(angset)
@@ -15,7 +18,7 @@
 		ang2	(angle p3 p4)
 	) ;_ end of setq
 
-	(if (not (or (equal (angtos ang1) (angtos ang2) 0.0001)
+	(if (not (or (equal (angtos ang1)          (angtos ang2) 0.0001)
 							 (equal (angtos (angle p2 p1)) (angtos ang2) 0.0001)
 					 ) ;_ end of or
 			) ;_ end of not
@@ -28,7 +31,7 @@
 	) ;_ end of if
 
 	(setq	pt-int (inters p1 (polar p1 (+ ang1 (/ pi 2)) 1) p3 p4 nil)
-		dis (distance p1 pt-int)
+		    dis    (distance p1 pt-int)
 	) ;_ end of setq
 
 	(command "offset" (/ dis 2) line1 p3 "")
@@ -39,6 +42,45 @@
 	(princ)
 ) ;_ end of defun mc
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun c:Q1 ()
+  (sub-qz "1-")
+) ;_ end of defun
+
+(defun c:Q2 ()
+  (sub-qz "2-")
+) ;_ end of defun
+
+(defun c:Q3 ()
+  (sub-qz "3-")
+) ;_ end of defun
+
+(defun c:Q4 ()
+  (sub-qz "4-")
+) ;_ end of defun
+
+(defun c:Q5 ()
+  (sub-qz "5-")
+) ;_ end of defun 
+
+(defun c:Q6 ()
+  (sub-qz "6-")
+) ;_ end of defun
+
+(defun c:Q7 ()
+  (sub-qz "7-")
+) ;_ end of defun 
+
+(defun c:Q8 ()
+  (sub-qz "8-")
+) ;_ end of defun
+
+(defun c:Q9 ()
+  (sub-qz "9-")
+) ;_ end of defun 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun angset ()
 	(setvar "angbase" 0)
 	(setvar "angdir" 0)
@@ -48,7 +90,7 @@
 	(angset)
 	(command "ucs" "w")
 	(setq	i   0
-		obj (ssadd)
+		    obj (ssadd)
 	) ;_ end of setq
 	(if (= (type ss) 'ename)
 		(ssadd ss obj)
@@ -56,13 +98,13 @@
 	) ;_ end of if
 	(repeat (sslength obj)
 		(setq nam (ssname obj i)
-			i (+ i 1)
-			tb  (entget nam)
+			    i   (+ i 1)
+			    tb  (entget nam)
 		) ;_ end of setq
-		(setq p1  (cdr (assoc 10 tb))	;Coordinate of the start point
-			p2 (cdr (assoc 11 tb))			;Coordinate of the end point
-			len (distance p1 p2)				;Length of the Line
-			inc (* len 0.08)						;Increment
+		(setq p1  (cdr (assoc 10 tb))	    ;Coordinate of the start point
+			    p2  (cdr (assoc 11 tb))			;Coordinate of the end point
+			    len (distance p1 p2)				;Length of the Line
+			    inc (* len 0.08)						;Increment
 		) ;_ end of setq
 
 		(command "change" nam "" (polar p1 (angle p2 p1) inc))
@@ -79,8 +121,8 @@
 ) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun get-type	(name / tab)
-	(setq	tab (entget name)
-		pub_type (cdr (assoc 0 tab))
+	(setq	tab      (entget name)
+		    pub_type (cdr (assoc 0 tab))
 	) ;_ end of setq
 ) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -111,25 +153,25 @@
 	) ;_ end of if
 	(repeat (sslength ss1)
 		(setq nam (ssname ss1 n)
-			tab (entget nam)
-			n (1+ n)
+			    tab (entget nam)
+			    n   (1+ n)
 		) ;_ end of setq
 		(setq lts (getvar "ltscale"))
 		;;circle
 		(if	(= (get-type nam) "CIRCLE")
 			(setq rad	(cdr (assoc 40 tab))
-				len	(* 2 (* 3.14 rad))
+				    len	(* 2 (* 3.14 rad))
 			)
       ;;ARC
 			(if (= (get-type nam) "ARC")
 				(setq rad (cdr (assoc 40 tab))
-					len (* 3.14 rad)
+					    len (* 3.14 rad)
 				) ;_ end of setq
 				;;LINE
 				(if (= (get-type nam) "LINE")
 					(setq	pt1 (cdr (assoc 10 tab))
-						pt2 (cdr (assoc 11 tab))
-						len (distance pt1 pt2)
+						    pt2 (cdr (assoc 11 tab))
+						    len (distance pt1 pt2)
 					) ;_ end of setq
 					(progn
 						(alert "\nEntity type error!")
@@ -157,4 +199,7 @@
 	(setvar "cmdecho" c)
 	(princ)
 ) ;_ end of defun
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
