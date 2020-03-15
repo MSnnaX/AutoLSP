@@ -126,7 +126,7 @@
 	) ;_ end of setq
 ) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun sub-QZ (num / )
+(defun sub-qz (num / )
   (if (NOT (setq ss (ssget "i" '((-4 . "<OR") (0 . "TEXT") (0 . "MTEXT") (0 . "DIMENSION") (-4 . "OR>")))))
     (setq ss (ssget '((-4 . "<OR") (0 . "TEXT") (0 . "MTEXT") (0 . "DIMENSION") (-4 . "OR>"))))
   ) ;_ end of if
