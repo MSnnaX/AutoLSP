@@ -78,6 +78,63 @@
   (sub-qz "9-")
 ) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun c:HT (/ str ob tb va b ename)
+  (setq str "THRU")
+  (while (not (setq ename (entsel)))
+    (alert "\nNo selection,go on...")
+  ) ;_ end of while
+
+  (if (not (is-entity-locked (car ename)))
+    (progn
+      (setq ob (car ename)
+	          tb (entget ob)
+	          va (cdr (assoc 1 tb))
+      ) ;_ end of setq
+      (if (= va "")
+	      (setq va "<>")
+      ) ;_ end of if
+      (setq va (strcat va " " str))
+      (change-value ob 1 va)
+    ) ;_ end of progn
+    (alert "Locked!")
+  ) ;_ end of if
+  (princ)
+) ;_ end of defun
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun c:HD (/ str ob tb va b ename)
+  (if (not (setq b (vl-bb-ref 'hz_d)))
+    (setq b "5")
+  ) ;_ end of if
+  (setq str (getreal (strcat "\nInput suffix 'DEEP <" b ">':")))
+  (if str
+    (setq str (rtos str 2 1))
+    (setq str b)
+  ) ;_ end of if
+
+  (vl-bb-set 'hz_d str)
+  (setq str (strcat "DEEP" str))
+
+  (while (not (setq ename (entsel)))
+    (alert "\nNo selection,go on...")
+  ) ;_ end of while
+
+  (if (not (is-entity-locked (car ename)))
+    (progn
+      (setq ob (car ename)
+	          tb (entget ob)
+	          va (cdr (assoc 1 tb))
+      ) ;_ end of setq
+      (if (= va "")
+	      (setq va "<>")
+      ) ;_ end of if
+      (setq va (strcat va " " str))
+      (change-value ob 1 va)
+    ) ;_ end of progn
+    (alert "Locked!")
+  ) ;_ end of if
+  (princ)
+) ;_ end of defun
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -120,12 +177,39 @@
 	(princ)
 ) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun change-value (e-name no value / tab val)
+  (setq	tab (entget e-name)
+	      val (cdr (assoc no tab))
+	      tab (subst (cons no value) (assoc no tab) tab)
+  ) ;_ end of setq
+  (entmod tab)
+  (entupd e-name)
+) ;_ end of defun
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun get-layer (sname / tab)
+  (setq	tab	          (entget sname)
+	      pu_layer_name (cdr (assoc 8 tab))
+  ) ;_ end of setq
+) ;_ end of defun
+
 (defun get-type	(name / tab)
 	(setq	tab      (entget name)
 		    pub_type (cdr (assoc 0 tab))
 	) ;_ end of setq
 ) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun is-entity-locked	(ename / la fl)
+  (setq	la (get-layer ename)
+	      fl (cdr (assoc 70 (tblsearch "LAYER" la)))
+  ) ;_ end of setq
+  (if (or (= fl 4)
+	        (= fl 5)
+      ) ;_ end of or
+    t
+    nil
+  ) ;_ end of if
+) ;_ end of defun
+
 (defun is-ss-unlocked (ss / i unlocked do ename)
   (if ss
     (progn
