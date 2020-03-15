@@ -126,6 +126,35 @@
 	) ;_ end of setq
 ) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun is-ss-unlocked (ss / i unlocked do ename)
+  (if ss
+    (progn
+      (setq i        0
+	          unlocked nil
+	          do       t
+      ) ;_ end of setq
+      (while do
+	      (setq ename (ssname ss i)
+	            i	    (1+ i)
+	      ) ;_ end of setq
+	      (if (= i (sslength ss))
+	        (setq do nil)
+	      ) ;_ end of if
+	      (if (not (is-entity-locked ename))
+	        (setq	unlocked t
+		            do       nil
+	        ) ;_ end of setq
+	      ) ;_ end of if
+      ) ;_ end of while
+      unlocked
+    ) ;_ end of progn
+    (progn
+      (alert "Selection null!")
+      (exit)
+    ) ;_ end of progn
+  ) ;_ end of if
+) ;_ end of defun
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun sub-qz (num / )
   (if (NOT (setq ss (ssget "i" '((-4 . "<OR") (0 . "TEXT") (0 . "MTEXT") (0 . "DIMENSION") (-4 . "OR>")))))
     (setq ss (ssget '((-4 . "<OR") (0 . "TEXT") (0 . "MTEXT") (0 . "DIMENSION") (-4 . "OR>"))))
