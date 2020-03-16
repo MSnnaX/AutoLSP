@@ -1,93 +1,330 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun c:CM (/ d i c1 sel nam tab cen ra lt cel lay cur len1 len2 lanam j latab p1 p2) 
+  (setierr)
+  (if 
+    (not 
+      (setq sel (ssget "_i" 
+                       '((-4 . "<OR")
+                         (0 . "CIRCLE")
+                         (0 . "ARC")
+                         (-4 . "OR>")
+                        )
+                ) ;_ end of ssget
+      ) ;_ end of setq
+    ) ;_ end of not
+    (progn 
+      (setq Sel (ssget 
+                  '((-4 . "<OR")
+                    (0 . "CIRCLE")
+                    (0 . "ARC")
+                    (-4 . "OR>")
+                   )
+                ) ;_ end of ssget
+      ) ;_ end of setq
+    ) ;end progn
+  ) ;end if
+  (command "ucs" "w")
+  (setq d   (getvar "dimscale")
+        cur (getvar "clayer")
+  ) ;end setq
+  (if (= d 0) 
+    (setvar "dimscale" 1)
+  ) ;end if
+  (setq i 0)
+  (if sel 
+    (repeat (sslength sel) 
+      (setq nam (ssname sel i)
+            tab (entget nam)
+            cen (cdr (assoc 10 tab)) ;Center
+            px  (car cen)
+            py  (cadr cen)
+            c1  (list (+ 0.005 px) (+ 0.005 py))
+            i   (1+ i)
+            ra  (cdr (assoc 40 tab)) ;radius
+            lay (cdr (assoc 8 tab)) ;layer
+            lt  (getvar "ltscale")
+            cel (/ (* ra 0.5) lt)
+            dsc (/ 1 (getvar "dimscale"))
+            nam (list nam cen)
+            j   0
+      ) ;_ end of setq
+      (setvar "celtscale" cel)
+      (setvar "clayer" lay)
+      (setvar "dimcen" (* ra 1.2 dsc))
+      (setq fl (cdr (assoc 70 (tblsearch "LAYER" lay))))
+      (if (= fl 4)  ;layer Locked
+        (command "layer" "u" lay)
+      )
+      (COMMAND "DIMCENTER" nam)
+      (setq la   (ssget "c" cen c1 '((0 . "LINE")))
+            len1 (* ra 2.4)
+      ) ;end setq
+      (repeat (sslength la) 
+        (setq lanam (ssname la j)
+              latab (entget lanam)
+              p1    (cdr (assoc 10 latab))
+              p2    (cdr (assoc 11 latab))
+              len2  (distance p1 p2)
+              j     (+ j 1)
+        ) ;end setq
+        (if (> (abs (- len1 len2)) 0.001) 
+          (progn 
+            (setq la (ssdel lanam la)
+                  j  (- j 1)
+            ) ;end setq
+          ) ;end progn
+        ) ;_ end of if
+      ) ;end repeat
+      (ce la)
+      (if (= fl 4)  ;layer Locked
+        (command "layer" "lo" lay)
+      )
+    ) ;end repeat
+    (alert "\nNo Selection!")
+  ) ;end if
+  (setvar "clayer" cur)
+  (command "ucs" "p")
+  (Reerr)
+  (PRINC)
+) ;_ end of DEFUN
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun c:MC (/)
-	(command "ucs" "w")
-	(angset)
-	(setq	
-    line1 (car (select-object "the fist line" "LINE"))
-		tab1	(entget line1)
-		p1		(cdr (assoc 10 tab1))
-		p2		(cdr (assoc 11 tab1))
-		ang1	(angle p1 p2)
-		line2	(car (select-object "the second line" "LINE"))
-		tab2	(entget line2)
-		p3		(cdr (assoc 10 tab2))
-		p4		(cdr (assoc 11 tab2))
-		ang2	(angle p3 p4)
-	) ;_ end of setq
-
-	(if (not (or (equal (angtos ang1)          (angtos ang2) 0.0001)
-							 (equal (angtos (angle p2 p1)) (angtos ang2) 0.0001)
-					 ) ;_ end of or
-			) ;_ end of not
-			(progn
-				(alert "No parallel!")
-				(redraw line1 4)
-				(redraw line2 4)
-				(exit)
-			) ;_ end of progn
-	) ;_ end of if
-
-	(setq	pt-int (inters p1 (polar p1 (+ ang1 (/ pi 2)) 1) p3 p4 nil)
-		    dis    (distance p1 pt-int)
-	) ;_ end of setq
-
-	(command "offset" (/ dis 2) line1 p3 "")
-	(cc (ssget "l"))
-	(redraw line1 4)
-	(redraw line2 4)
-	(command "ucs" "p")
-	(princ)
+(defun c:DC (/ i ss_li name p0 p1 p2 p1x p2x p1y p2y tab typ ss i count na ang dis 
+             angle_count tp1x tp2x tp1y tp2y ta ltyp) 
+  (setierr)
+  (command "ucs" "w")
+  (layer-41)
+  (scale)
+  (setq lfac (getvar "DIMLFAC"))
+  (prompt "\nSelect chamfer line:")
+  (setq ss_li       (ssget '((0 . "LINE")))
+        i           0
+        angle_count 0
+  ) ;_ end of setq
+  (if ss_li 
+    (progn 
+      (repeat (sslength ss_li) 
+        (setq name0 (ssname ss_li i)
+              tab   (entget name0)
+              p1    (cdr (assoc 10 tab))
+              p1x   (car p1)
+              p1y   (cadr p1)
+              p2    (cdr (assoc 11 tab))
+              p2x   (car p2)
+              p2y   (cadr p2)
+              a     (abs (- p1x p2x))
+              b     (abs (- p1y p2y))
+              i     (1+ i)
+        ) ;end setq
+        (if (< (abs (- a b)) 0.005) 
+          (setq angle_count (1+ angle_count)
+                tp1x        p1x
+                tp1y        p1y
+                tp2x        p2x
+                tp2y        p2y
+                ta          a
+                name        name0
+          ) ;_ end of setq
+        ) ;_ end of if
+      ) ;_ end of repeat
+      (if (= angle_count 0) 
+        (progn 
+          (alert "Error:\nMust chamfer line!")
+          (exit)
+        ) ;end progn
+        (if (> angle_count 1) 
+          (progn 
+            (alert 
+              "Error:\nNum of chamfer line > 1!"
+            ) ;_ end of alert
+            (exit)
+          ) ;end progn
+        ) ;_ end of if
+      ) ;end if
+      (setq p0x (/ (+ tp1x tp2x) 2)
+            p0y (/ (+ tp1y tp2y) 2)
+            p0  (list p0x p0y)
+      ) ;end setq
+      (SETQ S1 (GETVAR "DIMSCALE")
+            tx (getvar "dimtxt")
+            O  (GETVAR "ORTHOMODE")
+      ) ;end setq
+      (if (= s1 0) 
+        (progn 
+          (alert "Dimsclae=0\nNow set to 2.5!")
+          (setvar "Dimscale" 2.5)
+          (setq s1 2.5)
+        ) ;end progn
+      ) ;end if
+      (SETQ S (* S1 tx)
+            a (* ta lfac)
+      )
+      (if (> a 0.99) 
+        (setq a (RtoS a 2 0))
+        (setq a (RtoS a 2 1))
+      )
+      (setq ltyp (cdr (assoc 6 (entget name))))
+      (if (not ltyp) 
+        (setq ltyp "BYLAYER")
+      ) ;_ end of if
+      (command "zoom" "e")
+      (bound-c-line name)
+      (setq p1    pu-p1
+            p2    pu-p2
+            pu-p1 nil
+            pu-p2 nil
+      ) ;_ end of setq
+      (if 
+        (or (= ltyp "BYLAYER") 
+            (= (strcase ltyp) "BYBLOCK")
+        ) ;_ end of or
+        (setq ss (ssget "c" 
+                        p1
+                        p2
+                        (list 
+                          (cons 0 "LINE")
+                          (cons -4 "<OR")
+                          (CONS 6 "BYLAYER")
+                          (CONS 6 "BYBLOCK")
+                          (CONS -4 "OR>")
+                        ) ;_ end of list
+                 ) ;_ end of ssget
+        ) ;_ end of setq
+        (setq ss (ssget "c" 
+                        p1
+                        p2
+                        (list 
+                          (cons 0 "LINE")
+                          (cons 6 ltyp)
+                        ) ;_ end of list
+                 ) ;_ end of ssget
+        ) ;_ end of setq
+      ) ;_ end of if
+      (setq i     0
+            count 0
+      ) ;_ end of setq
+      (repeat (sslength ss) 
+        (setq na  (ssname ss i)
+              tab (entget na)
+              p1  (cdr (assoc 10 tab))
+              p2  (cdr (assoc 11 tab))
+              ang (atoi (rtos (* 180 (/ (angle p1 p2) pi)) 2 0))
+              dis (/ (distance p1 p2) (sqrt 2))
+              i   (1+ i)
+        ) ;_ end of setq
+        (if 
+          (and (/= 0 (rem (/ ang 45) 2)) 
+               (< (abs (- dis (atof a))) 0.01)
+          ) ;_ end of and
+          (setq count (1+ count))
+        ) ;_ end of if
+      ) ;_ end of repeat
+      (command "zoom" "p")
+      (if (= count 1) 
+        (command "leader" P0 PAUSE "" (strcat "C" a) "")
+        (command "leader" 
+                 P0
+                 PAUSE
+                 ""
+                 (strcat (itoa count) "-C" a)
+                 ""
+        ) ;_ end of command
+      ) ;_ end of if
+    ) ;_ end of progn
+    (alert "\nNo selection!")
+  ) ;_ end of if
+  (setvar "cecolor" "bylayer")
+  (command "ucs" "p")
+  (Reerr)
+  (princ)
+) ;_ end of defun
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun c:MC (/) 
+  (setierr)
+  (command "ucs" "w")
+  (angset)
+  (setq line1 (car (select-object "the fist line" "LINE"))
+        tab1  (entget line1)
+        p1    (cdr (assoc 10 tab1))
+        p2    (cdr (assoc 11 tab1))
+        ang1  (angle p1 p2)
+        line2 (car (select-object "the second line" "LINE"))
+        tab2  (entget line2)
+        p3    (cdr (assoc 10 tab2))
+        p4    (cdr (assoc 11 tab2))
+        ang2  (angle p3 p4)
+  ) ;_ end of setq
+  (if 
+    (not 
+      (or (equal (angtos ang1) (angtos ang2) 0.0001) 
+          (equal (angtos (angle p2 p1)) (angtos ang2) 0.0001)
+      ) ;_ end of or
+    ) ;_ end of not
+    (progn 
+      (alert "No parallel!")
+      (redraw line1 4)
+      (redraw line2 4)
+      (exit)
+    ) ;_ end of progn
+  ) ;_ end of if
+  (setq pt-int (inters p1 (polar p1 (+ ang1 (/ pi 2)) 1) p3 p4 nil)
+        dis    (distance p1 pt-int)
+  ) ;_ end of setq
+  (command "offset" (/ dis 2) line1 p3 "")
+  (cc (ssget "l"))
+  (redraw line1 4)
+  (redraw line2 4)
+  (command "ucs" "p")
+  (Reerr)
+  (princ)
 ) ;_ end of defun mc
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun c:Q2 ()
+(defun c:Q2 () 
   (sub-qz "2-")
 ) ;_ end of defun
 
-(defun c:Q3 ()
+(defun c:Q3 () 
   (sub-qz "3-")
 ) ;_ end of defun
 
-(defun c:Q4 ()
+(defun c:Q4 () 
   (sub-qz "4-")
 ) ;_ end of defun
 
-(defun c:Q5 ()
+(defun c:Q5 () 
   (sub-qz "5-")
 ) ;_ end of defun 
 
-(defun c:Q6 ()
+(defun c:Q6 () 
   (sub-qz "6-")
 ) ;_ end of defun
 
-(defun c:Q7 ()
+(defun c:Q7 () 
   (sub-qz "7-")
 ) ;_ end of defun 
 
-(defun c:Q8 ()
+(defun c:Q8 () 
   (sub-qz "8-")
 ) ;_ end of defun
 
-(defun c:Q9 ()
+(defun c:Q9 () 
   (sub-qz "9-")
 ) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun c:HT (/ str ob tb va b ename)
+(defun c:HT (/ str ob tb va b ename) 
   (setq str "THRU")
-  (while (not (setq ename (entsel)))
-    (alert "\nNo selection,go on...")
+  (while (not (setq ename (entsel))) 
+         (alert "\nNo selection,go on...")
   ) ;_ end of while
-
-  (if (not (is-entity-locked (car ename)))
-    (progn
+  (if (not (is-entity-locked (car ename))) 
+    (progn 
       (setq ob (car ename)
-	          tb (entget ob)
-	          va (cdr (assoc 1 tb))
+            tb (entget ob)
+            va (cdr (assoc 1 tb))
       ) ;_ end of setq
-      (if (= va "")
-	      (setq va "<>")
+      (if (= va "") 
+        (setq va "<>")
       ) ;_ end of if
       (setq va (strcat va " " str))
       (change-value ob 1 va)
@@ -97,31 +334,28 @@
   (princ)
 ) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun c:HD (/ str ob tb va b ename)
-  (if (not (setq b (vl-bb-ref 'hz_d)))
+(defun c:HD (/ str ob tb va b ename) 
+  (if (not (setq b (vl-bb-ref 'hz_d))) 
     (setq b "5")
   ) ;_ end of if
   (setq str (getreal (strcat "\nInput suffix 'DEEP <" b ">':")))
-  (if str
+  (if str 
     (setq str (rtos str 2 1))
     (setq str b)
   ) ;_ end of if
-
   (vl-bb-set 'hz_d str)
   (setq str (strcat "DEEP" str))
-
-  (while (not (setq ename (entsel)))
-    (alert "\nNo selection,go on...")
+  (while (not (setq ename (entsel))) 
+         (alert "\nNo selection,go on...")
   ) ;_ end of while
-
-  (if (not (is-entity-locked (car ename)))
-    (progn
+  (if (not (is-entity-locked (car ename))) 
+    (progn 
       (setq ob (car ename)
-	          tb (entget ob)
-	          va (cdr (assoc 1 tb))
+            tb (entget ob)
+            va (cdr (assoc 1 tb))
       ) ;_ end of setq
-      (if (= va "")
-	      (setq va "<>")
+      (if (= va "") 
+        (setq va "<>")
       ) ;_ end of if
       (setq va (strcat va " " str))
       (change-value ob 1 va)
@@ -134,143 +368,161 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun angset ()
-	(setvar "angbase" 0)
-	(setvar "angdir" 0)
+(defun angset () 
+  (setvar "angbase" 0)
+  (setvar "angdir" 0)
 ) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun cc (ss / nam i tb p1 len inc)
-	(angset)
-	(command "ucs" "w")
-	(setq	i   0
-		    obj (ssadd)
-	) ;_ end of setq
-	(if (= (type ss) 'ename)
-		(ssadd ss obj)
-		(setq obj ss)
-	) ;_ end of if
-	(repeat (sslength obj)
-		(setq nam (ssname obj i)
-			    i   (+ i 1)
-			    tb  (entget nam)
-		) ;_ end of setq
-		(setq p1  (cdr (assoc 10 tb))	    ;Coordinate of the start point
-			    p2  (cdr (assoc 11 tb))			;Coordinate of the end point
-			    len (distance p1 p2)				;Length of the Line
-			    inc (* len 0.08)						;Increment
-		) ;_ end of setq
-
-		(command "change" nam "" (polar p1 (angle p2 p1) inc))
-		(command "change" nam "" (polar p2 (angle p1 p2) inc))
-	) ;_ end of repeat
-	(ce obj)
-	(princ)
+(defun cc (ss / nam i tb p1 len inc) 
+  (angset)
+  (command "ucs" "w")
+  (setq i   0
+        obj (ssadd)
+  ) ;_ end of setq
+  (if (= (type ss) 'ename) 
+    (ssadd ss obj)
+    (setq obj ss)
+  ) ;_ end of if
+  (repeat (sslength obj) 
+    (setq nam (ssname obj i)
+          i   (+ i 1)
+          tb  (entget nam)
+    ) ;_ end of setq
+    (setq p1  (cdr (assoc 10 tb)) ;Coordinate of the start point
+          p2  (cdr (assoc 11 tb)) ;Coordinate of the end point
+          len (distance p1 p2) ;Length of the Line
+          inc (* len 0.08) ;Increment
+    ) ;_ end of setq
+    (command "change" nam "" (polar p1 (angle p2 p1) inc))
+    (command "change" nam "" (polar p2 (angle p1 p2) inc))
+  ) ;_ end of repeat
+  (ce obj)
+  (princ)
 ) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun ce (ss /)
-	(sub-ltchange ss "center" 4 "red")
-	(princ)
+(defun ce (ss /) 
+  (sub-ltchange ss "center" 4 "red")
+  (princ)
 ) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun change-value (e-name no value / tab val)
-  (setq	tab (entget e-name)
-	      val (cdr (assoc no tab))
-	      tab (subst (cons no value) (assoc no tab) tab)
+(defun change-value (e-name no value / tab val) 
+  (setq tab (entget e-name)
+        val (cdr (assoc no tab))
+        tab (subst (cons no value) (assoc no tab) tab)
   ) ;_ end of setq
   (entmod tab)
   (entupd e-name)
 ) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun get-layer (sname / tab)
-  (setq	tab	          (entget sname)
-	      pu_layer_name (cdr (assoc 8 tab))
+(defun get-layer (sname / tab) 
+  (setq tab           (entget sname)
+        pu_layer_name (cdr (assoc 8 tab))
   ) ;_ end of setq
 ) ;_ end of defun
 
-(defun get-type	(name / tab)
-	(setq	tab      (entget name)
-		    pub_type (cdr (assoc 0 tab))
-	) ;_ end of setq
+(defun get-type (name / tab) 
+  (setq tab      (entget name)
+        pub_type (cdr (assoc 0 tab))
+  ) ;_ end of setq
 ) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun is-entity-locked	(ename / la fl)
-  (setq	la (get-layer ename)
-	      fl (cdr (assoc 70 (tblsearch "LAYER" la)))
+(defun is-entity-locked (ename / la fl) 
+  (setq la (get-layer ename)
+        fl (cdr (assoc 70 (tblsearch "LAYER" la)))
   ) ;_ end of setq
-  (if (or (= fl 4)
-	        (= fl 5)
-      ) ;_ end of or
+  (if 
+    (or (= fl 4) 
+        (= fl 5)
+    ) ;_ end of or
     t
     nil
   ) ;_ end of if
 ) ;_ end of defun
 
-(defun is-ss-unlocked (ss / i unlocked do ename)
-  (if ss
-    (progn
+(defun is-ss-unlocked (ss / i unlocked do ename) 
+  (if ss 
+    (progn 
       (setq i        0
-	          unlocked nil
-	          do       t
+            unlocked nil
+            do       t
       ) ;_ end of setq
-      (while do
-	      (setq ename (ssname ss i)
-	            i	    (1+ i)
-	      ) ;_ end of setq
-	      (if (= i (sslength ss))
-	        (setq do nil)
-	      ) ;_ end of if
-	      (if (not (is-entity-locked ename))
-	        (setq	unlocked t
-		            do       nil
-	        ) ;_ end of setq
-	      ) ;_ end of if
+      (while do 
+             (setq ename (ssname ss i)
+                   i     (1+ i)
+             ) ;_ end of setq
+             (if (= i (sslength ss)) 
+               (setq do nil)
+             ) ;_ end of if
+             (if (not (is-entity-locked ename)) 
+               (setq unlocked t
+                     do       nil
+               ) ;_ end of setq
+             ) ;_ end of if
       ) ;_ end of while
       unlocked
     ) ;_ end of progn
-    (progn
+    (progn 
       (alert "Selection null!")
       (exit)
     ) ;_ end of progn
   ) ;_ end of if
 ) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun sub-qz (num / )
-  (if (NOT (setq ss (ssget "i" '((-4 . "<OR") (0 . "TEXT") (0 . "MTEXT") (0 . "DIMENSION") (-4 . "OR>")))))
-    (setq ss (ssget '((-4 . "<OR") (0 . "TEXT") (0 . "MTEXT") (0 . "DIMENSION") (-4 . "OR>"))))
+(defun sub-qz (num /) 
+  (if 
+    (NOT 
+      (setq ss (ssget "i" 
+                      '((-4 . "<OR")
+                        (0 . "TEXT")
+                        (0 . "MTEXT")
+                        (0 . "DIMENSION")
+                        (-4 . "OR>")
+                       )
+               )
+      )
+    )
+    (setq ss (ssget 
+               '((-4 . "<OR")
+                 (0 . "TEXT")
+                 (0 . "MTEXT")
+                 (0 . "DIMENSION")
+                 (-4 . "OR>")
+                )
+             )
+    )
   ) ;_ end of if
-  (if ss
-    (if	(is-ss-unlocked ss)
-      (progn
-	      (setq i 0)
-	      (repeat	(sslength ss)
-	        (setq	ob (ssname ss i)
-		            tb (entget ob)
-		            va (cdr (assoc 1 tb))
-		            i  (1+ i)
-	        ) ;_ end of setq
-	        (if (= va "")
-	          (setq va "<>")
-	        ) ;_ end of if
-
-	        (if (= num "1-")
-	          (if	(setq p (vl-string-search "-" va))
-	            (setq va (substr va (+ p 2) (- (strlen va) p 1)))
-	          ) ;_ end of if
-	          (if	(setq p (vl-string-search "-" va))
-	            (progn
-		            (setq str1 (substr va 1 p)) ;has not "-"
-		            (if (= (type (read str1)) 'INT)
-		              (setq va (strcat num (substr va (+ p 2) (strlen va))))
-		              (setq va (strcat num va))
-		            ) ;_ end of if
-	            ) ;_ end of progn
-	            (setq va (strcat num va))
-	          ) ;_ end of if
-	        ) ;_ end of if
-	        (setq	tb (subst (cons 1 va) (assoc 1 tb) tb))
-	        (entmod tb)
-	        (entupd ob)
-	      ) ;_ end of repeat
+  (if ss 
+    (if (is-ss-unlocked ss) 
+      (progn 
+        (setq i 0)
+        (repeat (sslength ss) 
+          (setq ob (ssname ss i)
+                tb (entget ob)
+                va (cdr (assoc 1 tb))
+                i  (1+ i)
+          ) ;_ end of setq
+          (if (= va "") 
+            (setq va "<>")
+          ) ;_ end of if
+          (if (= num "1-") 
+            (if (setq p (vl-string-search "-" va)) 
+              (setq va (substr va (+ p 2) (- (strlen va) p 1)))
+            ) ;_ end of if
+            (if (setq p (vl-string-search "-" va)) 
+              (progn 
+                (setq str1 (substr va 1 p)) ;has not "-"
+                (if (= (type (read str1)) 'INT) 
+                  (setq va (strcat num (substr va (+ p 2) (strlen va))))
+                  (setq va (strcat num va))
+                ) ;_ end of if
+              ) ;_ end of progn
+              (setq va (strcat num va))
+            ) ;_ end of if
+          ) ;_ end of if
+          (setq tb (subst (cons 1 va) (assoc 1 tb) tb))
+          (entmod tb)
+          (entupd ob)
+        ) ;_ end of repeat
       ) ;_ end of progn
       (alert "All locked!")
     ) ;_ end of if
@@ -279,78 +531,79 @@
   (princ)
 ) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun select-object (text type1 / s ent-name)
-	(while
-		(not
-			(progn
-				(setq ent-name (entsel (strcat "\nSelect " text ":")))
-				(if ent-name
-					(= (get-type (car ent-name)) type1)
-					nil
-				) ;_ end of if
-			) ;_ end of progn
-		) ;_ end of not
-		(alert (strcat "\nMust " text " , go on..."))
-	) ;_ end of while
-	(redraw (car ent-name) 3)
-	ent-name
+(defun select-object (text type1 / s ent-name) 
+  (while 
+    (not 
+      (progn 
+        (setq ent-name (entsel (strcat "\nSelect " text ":")))
+        (if ent-name 
+          (= (get-type (car ent-name)) type1)
+          nil
+        ) ;_ end of if
+      ) ;_ end of progn
+    ) ;_ end of not
+    (alert (strcat "\nMust " text " , go on..."))
+  ) ;_ end of while
+  (redraw (car ent-name) 3)
+  ent-name
 ) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun sub-ltchange (ss type1 scale color / n	nam tab rad len pt1 pt2 leg sca lts ss1 c)
-	(setq	n 0 ss1 (ssadd))
-	(setq c (getvar "cmdecho"))
-	(setvar "cmdecho" 0)
-	(if (= (type ss) 'ename)
-		(ssadd ss ss1)
-		(setq ss1 ss)
-	) ;_ end of if
-	(repeat (sslength ss1)
-		(setq nam (ssname ss1 n)
-			    tab (entget nam)
-			    n   (1+ n)
-		) ;_ end of setq
-		(setq lts (getvar "ltscale"))
-		;;circle
-		(if	(= (get-type nam) "CIRCLE")
-			(setq rad	(cdr (assoc 40 tab))
-				    len	(* 2 (* 3.14 rad))
-			)
+(defun sub-ltchange (ss type1 scale color / n nam tab rad len pt1 pt2 leg sca lts ss1 c) 
+  (setq n   0
+        ss1 (ssadd)
+  )
+  (setq c (getvar "cmdecho"))
+  (setvar "cmdecho" 0)
+  (if (= (type ss) 'ename) 
+    (ssadd ss ss1)
+    (setq ss1 ss)
+  ) ;_ end of if
+  (repeat (sslength ss1) 
+    (setq nam (ssname ss1 n)
+          tab (entget nam)
+          n   (1+ n)
+    ) ;_ end of setq
+    (setq lts (getvar "ltscale"))
+    ;;circle
+    (if (= (get-type nam) "CIRCLE") 
+      (setq rad (cdr (assoc 40 tab))
+            len (* 2 (* 3.14 rad))
+      )
       ;;ARC
-			(if (= (get-type nam) "ARC")
-				(setq rad (cdr (assoc 40 tab))
-					    len (* 3.14 rad)
-				) ;_ end of setq
-				;;LINE
-				(if (= (get-type nam) "LINE")
-					(setq	pt1 (cdr (assoc 10 tab))
-						    pt2 (cdr (assoc 11 tab))
-						    len (distance pt1 pt2)
-					) ;_ end of setq
-					(progn
-						(alert "\nEntity type error!")
-						(redraw nam 3)
-						(exit)
-					) ;_ end of progn
-				) ;_ end of if
-			) ;_ end of if
-		) ;_ end of if
-
-		(cond ((and (> len 0)		(<= len 2))		(setq leg 2))
-					((and (> len 2)		(<= len 5))		(setq leg 6))
-	  			((and (> len 5)		(<= len 30))	(setq leg 20))
-					((and (> len 30)	(<= len 50))	(setq leg 40))
-					((and (> len 50)	(<= len 100))	(setq leg 75))
-							 ((> len 100)								(setq leg 100))
-		) ;_ end of cond
-		(setq sca (/ leg scale lts 2))
-		(if	(not (tblsearch "LTYPE" type1))
-			(command "-linetype" "l" type1 "acad.lin" "")
-		) ;_ end of if
-		(command "change" nam "" "p" "c" color "lt"	type1 "s" sca "") ;_ end of command
-	) ;_ end of repeat
-
-	(setvar "cmdecho" c)
-	(princ)
+      (if (= (get-type nam) "ARC") 
+        (setq rad (cdr (assoc 40 tab))
+              len (* 3.14 rad)
+        ) ;_ end of setq
+        ;;LINE
+        (if (= (get-type nam) "LINE") 
+          (setq pt1 (cdr (assoc 10 tab))
+                pt2 (cdr (assoc 11 tab))
+                len (distance pt1 pt2)
+          ) ;_ end of setq
+          (progn 
+            (alert "\nEntity type error!")
+            (redraw nam 3)
+            (exit)
+          ) ;_ end of progn
+        ) ;_ end of if
+      ) ;_ end of if
+    ) ;_ end of if
+    (cond 
+      ((and (> len 0) (<= len 2)) (setq leg 2))
+      ((and (> len 2) (<= len 5)) (setq leg 6))
+      ((and (> len 5) (<= len 30)) (setq leg 20))
+      ((and (> len 30) (<= len 50)) (setq leg 40))
+      ((and (> len 50) (<= len 100)) (setq leg 75))
+      ((> len 100) (setq leg 100))
+    ) ;_ end of cond
+    (setq sca (/ leg scale lts 2))
+    (if (not (tblsearch "LTYPE" type1)) 
+      (command "-linetype" "l" type1 "acad.lin" "")
+    ) ;_ end of if
+    (command "change" nam "" "p" "c" color "lt" type1 "s" sca "") ;_ end of command
+  ) ;_ end of repeat
+  (setvar "cmdecho" c)
+  (princ)
 ) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
