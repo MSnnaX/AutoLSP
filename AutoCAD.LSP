@@ -613,6 +613,20 @@
   ) ;_ end of setq
 ) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun layer-41 (/ c) 
+  (setq c (getvar "cmdecho"))
+  (setvar "cmdecho" 0)
+  (if (tblsearch "layer" "41") 
+    (progn 
+      (command "layer" "on" "41" "u" "41" "T" "41" "")
+      (setvar "clayer" "41")
+    ) ;_ end of progn
+    (command "layer" "n" "41" "c" 3 "41" "s" "41" "")
+  ) ;_ end of if
+  (setvar "cmdecho" c)
+  (princ)
+) ;_ end of defun
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun is-entity-locked (ename / la fl) 
   (setq la (get-layer ename)
         fl (cdr (assoc 70 (tblsearch "LAYER" la)))
