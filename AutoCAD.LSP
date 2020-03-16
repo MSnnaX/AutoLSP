@@ -669,6 +669,49 @@
   ) ;_ end of if
 ) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun select-object (text type1 / s ent-name) 
+  (while 
+    (not 
+      (progn 
+        (setq ent-name (entsel (strcat "\nSelect " text ":")))
+        (if ent-name 
+          (= (get-type (car ent-name)) type1)
+          nil
+        ) ;_ end of if
+      ) ;_ end of progn
+    ) ;_ end of not
+    (alert (strcat "\nMust " text " , go on..."))
+  ) ;_ end of while
+  (redraw (car ent-name) 3)
+  ent-name
+) ;_ end of defun
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun sub-ltchange (ss type1 scale color / n nam tab rad len pt1 pt2 leg sca lts ss1 c) 
+  (setq n   0
+        ss1 (ssadd)
+  ) ;_ end of setq
+  (setq c (getvar "cmdecho"))
+  (setvar "cmdecho" 0)
+  (if (= (type ss) 'ename) 
+    (ssadd ss ss1) ;if entity name ,then change to seletion
+    (setq ss1 ss)
+  ) ;_ end of if
+  (repeat (sslength ss1) 
+    (setq nam (ssname ss1 n)
+          tab (entget nam)
+          n   (1+ n)
+    ) ;_ end of setq
+    (setq lts (getvar "ltscale"))
+    (setq sca 1)
+    (if (not (tblsearch "LTYPE" type1)) 
+      (command "-linetype" "l" type1 "acad.lin" "")
+    ) ;_ end of if
+    (command "change" nam "" "p" "c" color "lt" type1 "s" sca "") ;_ end of command
+  ) ;_ end of repeat
+  (setvar "cmdecho" c)
+  (princ)
+) ;_ end of defun
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun sub-qz (num /) 
   (setierr)
   (if 
@@ -734,49 +777,6 @@
   (princ)
 ) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun select-object (text type1 / s ent-name) 
-  (while 
-    (not 
-      (progn 
-        (setq ent-name (entsel (strcat "\nSelect " text ":")))
-        (if ent-name 
-          (= (get-type (car ent-name)) type1)
-          nil
-        ) ;_ end of if
-      ) ;_ end of progn
-    ) ;_ end of not
-    (alert (strcat "\nMust " text " , go on..."))
-  ) ;_ end of while
-  (redraw (car ent-name) 3)
-  ent-name
-) ;_ end of defun
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun sub-ltchange (ss type1 scale color / n nam tab rad len pt1 pt2 leg sca lts ss1 c) 
-  (setq n   0
-        ss1 (ssadd)
-  ) ;_ end of setq
-  (setq c (getvar "cmdecho"))
-  (setvar "cmdecho" 0)
-  (if (= (type ss) 'ename) 
-    (ssadd ss ss1) ;if entity name ,then change to seletion
-    (setq ss1 ss)
-  ) ;_ end of if
-  (repeat (sslength ss1) 
-    (setq nam (ssname ss1 n)
-          tab (entget nam)
-          n   (1+ n)
-    ) ;_ end of setq
-    (setq lts (getvar "ltscale"))
-    (setq sca 1)
-    (if (not (tblsearch "LTYPE" type1)) 
-      (command "-linetype" "l" type1 "acad.lin" "")
-    ) ;_ end of if
-    (command "change" nam "" "p" "c" color "lt" type1 "s" sca "") ;_ end of command
-  ) ;_ end of repeat
-  (setvar "cmdecho" c)
-  (princ)
-) ;_ end of defun
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (SetQ **SysVarNL** '("AUNITS" "AUPREC" "ATTDIA" "CECOLOR" "CELTYPE" "CMDECHO" 
                      "EXPERT" "HIGHLIGHT" "LUNITS" "LUPREC" "OSMODE" "ORTHOMODE" 
                      "TEXTSTYLE" "PLINEWID" "DIMPOST")
@@ -810,4 +810,36 @@
   ) ;_ end of If
 ) ;_ end of Defun-Q
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun tole7 (up low / di c) 
+  (setierr)
+  (if (setq di (ssget '((0 . "DIMENSION")))) 
+    (if (is-ss-unlocked di) 
+      (command "dimoverride" 
+               "dimdec"
+               "3"
+               "dimzin"
+               "8"
+               "dimtdec"
+               "3"
+               "dimtzin"
+               "8"
+               "dimtol"
+               "on"
+               "dimtfac"
+               "0.7"
+               "dimtp"
+               up
+               "dimtm"
+               low
+               ""
+               di
+               ""
+      ) ;_ end of command
+      (alert "All locked!")
+    ) ;_ end of if
+    (alert "No selection!")
+  ) ;_ end of if
+  (reerr)
+  (princ)
+) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
