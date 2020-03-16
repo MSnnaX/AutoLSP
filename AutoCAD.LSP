@@ -656,6 +656,7 @@
 ) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun sub-qz (num /) 
+  (setierr)
   (if 
     (NOT 
       (setq ss (ssget "i" 
@@ -665,9 +666,9 @@
                         (0 . "DIMENSION")
                         (-4 . "OR>")
                        )
-               )
-      )
-    )
+               ) ;_ end of ssget
+      ) ;_ end of setq
+    ) ;_ end of NOT
     (setq ss (ssget 
                '((-4 . "<OR")
                  (0 . "TEXT")
@@ -675,8 +676,8 @@
                  (0 . "DIMENSION")
                  (-4 . "OR>")
                 )
-             )
-    )
+             ) ;_ end of ssget
+    ) ;_ end of setq
   ) ;_ end of if
   (if ss 
     (if (is-ss-unlocked ss) 
@@ -706,7 +707,7 @@
               (setq va (strcat num va))
             ) ;_ end of if
           ) ;_ end of if
-          (setq tb (subst (cons 1 va) (assoc 1 tb) tb))
+          (setq tb (subst (cons 1 va) (assoc 1 tb) tb)) ;_ end of setq
           (entmod tb)
           (entupd ob)
         ) ;_ end of repeat
@@ -715,6 +716,7 @@
     ) ;_ end of if
     (alert "No selection!")
   ) ;_ end of if
+  (reerr)
   (princ)
 ) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -738,11 +740,11 @@
 (defun sub-ltchange (ss type1 scale color / n nam tab rad len pt1 pt2 leg sca lts ss1 c) 
   (setq n   0
         ss1 (ssadd)
-  )
+  ) ;_ end of setq
   (setq c (getvar "cmdecho"))
   (setvar "cmdecho" 0)
   (if (= (type ss) 'ename) 
-    (ssadd ss ss1)
+    (ssadd ss ss1) ;if entity name ,then change to seletion
     (setq ss1 ss)
   ) ;_ end of if
   (repeat (sslength ss1) 
@@ -751,39 +753,7 @@
           n   (1+ n)
     ) ;_ end of setq
     (setq lts (getvar "ltscale"))
-    ;;circle
-    (if (= (get-type nam) "CIRCLE") 
-      (setq rad (cdr (assoc 40 tab))
-            len (* 2 (* 3.14 rad))
-      )
-      ;;ARC
-      (if (= (get-type nam) "ARC") 
-        (setq rad (cdr (assoc 40 tab))
-              len (* 3.14 rad)
-        ) ;_ end of setq
-        ;;LINE
-        (if (= (get-type nam) "LINE") 
-          (setq pt1 (cdr (assoc 10 tab))
-                pt2 (cdr (assoc 11 tab))
-                len (distance pt1 pt2)
-          ) ;_ end of setq
-          (progn 
-            (alert "\nEntity type error!")
-            (redraw nam 3)
-            (exit)
-          ) ;_ end of progn
-        ) ;_ end of if
-      ) ;_ end of if
-    ) ;_ end of if
-    (cond 
-      ((and (> len 0) (<= len 2)) (setq leg 2))
-      ((and (> len 2) (<= len 5)) (setq leg 6))
-      ((and (> len 5) (<= len 30)) (setq leg 20))
-      ((and (> len 30) (<= len 50)) (setq leg 40))
-      ((and (> len 50) (<= len 100)) (setq leg 75))
-      ((> len 100) (setq leg 100))
-    ) ;_ end of cond
-    (setq sca (/ leg scale lts 2))
+    (setq sca 1)
     (if (not (tblsearch "LTYPE" type1)) 
       (command "-linetype" "l" type1 "acad.lin" "")
     ) ;_ end of if
@@ -825,6 +795,5 @@
     (Alert "错误：没有对应的(SetIErr)!")
   ) ;_ end of If
 ) ;_ end of Defun-Q
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
