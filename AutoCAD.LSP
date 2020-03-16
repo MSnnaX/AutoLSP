@@ -240,6 +240,111 @@
   (princ)
 ) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun c:HD (/ str ob tb va b ename) 
+  (setierr)
+  (if (not (setq b (vl-bb-ref 'hz_d))) 
+    (setq b "5")
+  ) ;_ end of if
+  (setq str (getreal (strcat "\nInput suffix 'DEP <" b ">':")))
+  (if str 
+    (setq str (rtos str 2 1))
+    (setq str b)
+  ) ;_ end of if
+  (vl-bb-set 'hz_d str)
+  (setq str (strcat "DEP" str))
+  (while (not (setq ename (entsel))) 
+         (alert "\nNo selection,go on...")
+  ) ;_ end of while
+  (if (not (is-entity-locked (car ename))) 
+    (progn 
+      (setq ob (car ename)
+            tb (entget ob)
+            va (cdr (assoc 1 tb))
+      ) ;_ end of setq
+      (if (= va "") 
+        (setq va "<>")
+      ) ;_ end of if
+      (setq va (strcat va " " str))
+      (change-value ob 1 va)
+    ) ;_ end of progn
+    (alert "Locked!")
+  ) ;_ end of if
+  (reerr)
+  (princ)
+) ;_ end of defun
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun c:HT (/ str ob tb va b ename) 
+  (setierr)
+  (setq str "THR")
+  (while (not (setq ename (entsel))) 
+         (alert "\nNo selection,go on...")
+  ) ;_ end of while
+  (if (not (is-entity-locked (car ename))) 
+    (progn 
+      (setq ob (car ename)
+            tb (entget ob)
+            va (cdr (assoc 1 tb))
+      ) ;_ end of setq
+      (if (= va "") 
+        (setq va "<>")
+      ) ;_ end of if
+      (setq va (strcat va " " str))
+      (change-value ob 1 va)
+    ) ;_ end of progn
+    (alert "Locked!")
+  ) ;_ end of if
+  (reerr)
+  (princ)
+) ;_ end of defun
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun c:HZ (/ str ob tb va b ename) 
+  (setierr)
+  (if (not (setq b (vl-bb-ref 'hz))) 
+    (setq b "ONE WALL")
+  ) ;_ end of if
+  (setq str (STRCASE 
+              (getstring 
+                (strcat 
+                  "\nBACKSIDE(B)/BOTHSIDE(S)/EVENLY SPACED(E)/ONE WALL(O)/THR ONE WALL(T)/<"
+                  b
+                  ">:"
+                ) ;_ end of strcat
+              ) ;_ end of getstring
+            ) ;_ end of STRCASE
+  ) ;_ end of setq
+  (cond 
+    ((= str "") (setq str b))
+    ((= str "B") (setq str "\nBACK"))
+    ((= str "S") (setq str "\nBOTHSIDE"))
+    ((= str "E") (setq str "\nEVENLY SPACED"))
+    ((= str "O") (setq str "\nONE WALL"))
+    ((= str "T") (setq str "THR\nONE WALL"))
+    (T STR)
+  ) ;_ end of cond
+  (vl-bb-set 'hz str)
+  (while (not (setq ename (entsel))) 
+         (alert "\nNo selection,go on...")
+  ) ;_ end of while
+  (if (not (is-entity-locked (car ename))) 
+    (progn 
+      (setq ob (car ename)
+            tb (entget ob)
+            va (cdr (assoc 1 tb))
+      ) ;_ end of setq
+      (if (= va "") 
+        (setq va "<>")
+      ) ;_ end of if
+      (setq va (strcat va " " str))
+      (setq tb (subst (cons 1 va) (assoc 1 tb) tb))
+      (entmod tb)
+      (entupd ob)
+    ) ;_ end of progn
+    (alert "Locked!")
+  ) ;_ end of if
+  (reerr)
+  (princ)
+) ;_ end of defun
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun c:MC (/) 
   (setierr)
   (command "ucs" "w")
@@ -280,6 +385,10 @@
   (princ)
 ) ;_ end of defun mc
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun c:Q1 () 
+  (sub-qz "1-")
+) ;_ end of defun
+
 (defun c:Q2 () 
   (sub-qz "2-")
 ) ;_ end of defun
@@ -310,58 +419,89 @@
 
 (defun c:Q9 () 
   (sub-qz "9-")
+) ;_ end of defun 
+
+(defun c:Q10 () 
+  (sub-qz "10-")
 ) ;_ end of defun
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun c:HT (/ str ob tb va b ename) 
-  (setq str "THRU")
-  (while (not (setq ename (entsel))) 
-         (alert "\nNo selection,go on...")
-  ) ;_ end of while
-  (if (not (is-entity-locked (car ename))) 
-    (progn 
-      (setq ob (car ename)
-            tb (entget ob)
-            va (cdr (assoc 1 tb))
-      ) ;_ end of setq
-      (if (= va "") 
-        (setq va "<>")
-      ) ;_ end of if
-      (setq va (strcat va " " str))
-      (change-value ob 1 va)
-    ) ;_ end of progn
-    (alert "Locked!")
-  ) ;_ end of if
-  (princ)
+
+(defun c:Q11 () 
+  (sub-qz "11-")
+) ;_ end of defun 
+
+(defun c:Q12 () 
+  (sub-qz "12-")
+) ;_ end of defun 
+
+(defun c:Q13 () 
+  (sub-qz "13-")
 ) ;_ end of defun
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun c:HD (/ str ob tb va b ename) 
-  (if (not (setq b (vl-bb-ref 'hz_d))) 
-    (setq b "5")
-  ) ;_ end of if
-  (setq str (getreal (strcat "\nInput suffix 'DEEP <" b ">':")))
-  (if str 
-    (setq str (rtos str 2 1))
-    (setq str b)
-  ) ;_ end of if
-  (vl-bb-set 'hz_d str)
-  (setq str (strcat "DEEP" str))
-  (while (not (setq ename (entsel))) 
-         (alert "\nNo selection,go on...")
-  ) ;_ end of while
-  (if (not (is-entity-locked (car ename))) 
-    (progn 
-      (setq ob (car ename)
-            tb (entget ob)
-            va (cdr (assoc 1 tb))
+
+(defun c:Q14 () 
+  (sub-qz "14-")
+) ;_ end of defun
+
+(defun c:QZ (/ str ob tb va b ename ss i) 
+  (setierr)
+  (if 
+    (NOT 
+      (setq ss (ssget "i" 
+                      '((-4 . "<OR")
+                        (0 . "TEXT")
+                        (0 . "MTEXT")
+                        (0 . "DIMENSION")
+                        (-4 . "OR>")
+                       )
+               ) ;_ end of ssget
       ) ;_ end of setq
-      (if (= va "") 
-        (setq va "<>")
-      ) ;_ end of if
-      (setq va (strcat va " " str))
-      (change-value ob 1 va)
-    ) ;_ end of progn
-    (alert "Locked!")
+    ) ;_ end of NOT
+    (setq ss (ssget 
+               '((-4 . "<OR")
+                 (0 . "TEXT")
+                 (0 . "MTEXT")
+                 (0 . "DIMENSION")
+                 (-4 . "OR>")
+                )
+             ) ;_ end of ssget
+    ) ;_ end of setq
   ) ;_ end of if
+  (if ss 
+    (if (is-ss-unlocked ss) 
+      (progn 
+        (if (setq b (vl-bb-ref 'qz)) 
+          (setq str (getstring (strcat "\nInput prefix<" b ">:")))
+          (setq str (getstring "\nInput prefix<2->:")
+                b   "2-"
+          ) ;_ end of setq
+        ) ;_ end of if
+        (if (= (type (read str)) 'int) 
+          (setq str (strcat str "-"))
+        ) ;_ end of if
+        (if (= str "") 
+          (setq str b)
+        ) ;_ end of if
+        (vl-bb-set 'qz str)
+        (setq i 0)
+        (repeat (sslength ss) 
+          (setq ob (ssname ss i)
+                tb (entget ob)
+                va (cdr (assoc 1 tb))
+                i  (1+ i)
+          ) ;_ end of setq
+          (if (= va "") 
+            (setq va "<>")
+          ) ;_ end of if
+          (setq va (strcat str va))
+          (setq tb (subst (cons 1 va) (assoc 1 tb) tb))
+          (entmod tb)
+          (entupd ob)
+        ) ;_ end of repeat
+      ) ;_ end of progn
+      (alert "All locked!")
+    ) ;_ end of if
+    (alert "No selection!")
+  ) ;_ end of if
+  (reerr)
   (princ)
 ) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
