@@ -553,10 +553,119 @@
 ;The sub Key                                                                                                 ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun angset () 
   (setvar "angbase" 0)
   (setvar "angdir" 0)
 ) ;_ end of defun
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun bound-c (pt1 pt2 /) 
+  (setq ss1 (ssget "c" 
+                   pt1
+                   pt2
+                   '((-4 . "<AND")
+                     (-4 . "<OR")
+                     (0 . "LINE")
+                     (0 . "CIRCLE")
+                     (0 . "ARC")
+                     (-4 . "OR>")
+                     (-4 . "<NOT")
+                     (8 . "41")
+                     (-4 . "NOT>")
+                     (-4 . "AND>")
+                    )
+            ) ;end ssget
+  ) ;end setq
+  (bound-sub ss1)
+) ;_ end of defun bound-c
+
+(defun bound-c-line (line-name / p1 p2 p3 p4 do) 
+  (setq p1 (line-start-point line-name)
+        p2 (line-end-point line-name)
+        p3 p1
+        p4 p2
+        do t
+  ) ;_ end of setq
+  (while do 
+         (bound-c p1 p2)
+         (setq p1    pu-p1
+               p2    pu-p2
+               pu-p1 nil
+               pu-p2 nil
+         ) ;_ end of setq
+         (if 
+           (and 
+             (< (distance p1 p3) 0.001)
+             (< (distance p2 p4) 0.001)
+           ) ;_ end of and
+           (setq do nil)
+           (setq p3 p1
+                 p4 p2
+           ) ;_ end of setq
+         ) ;_ end of if
+  ) ;_ end of while
+  (setq pu-p1 p1
+        pu-p2 p2
+  ) ;_ end of setq
+) ;_ end of defun bound-c-line
+
+(defun bound-sub (ss1 / i typ name tab pt3 pt4 x3 y3 x4 y4 ra minx miny maxx maxy) 
+  (setq i    0
+        minx 99999999
+        miny 99999999
+        maxx -99999999
+        maxy -99999999
+  ) ;_ end of setq
+  (if ss1 
+    (progn 
+      (repeat (sslength ss1) 
+        (setq name (ssname ss1 i)
+              tab  (entget name)
+              typ  (cdr (assoc 0 tab))
+              i    (+ i 1)
+        ) ;end setq
+        (if (= typ "LINE") 
+          (progn 
+            (setq pt3 (cdr (assoc 10 tab))
+                  pt4 (cdr (assoc 11 tab))
+                  x3  (car pt3)
+                  y3  (cadr pt3)
+                  x4  (car pt4)
+                  y4  (cadr pt4)
+            ) ;end setq
+            (setq minx (min minx x3 x4)
+                  miny (min miny y3 y4)
+                  maxx (max maxx x3 x4)
+                  maxy (max maxy y3 y4)
+            ) ;end setq
+          ) ;end progn then
+          (progn  ;;arc or circle
+                 (setq pt3 (cdr (assoc 10 tab))
+                       x3  (car pt3)
+                       y3  (cadr pt3)
+                       ra  (cdr (assoc 40 tab))
+                 ) ;end setq
+                 (setq minx (min minx (- x3 ra))
+                       miny (min miny (- y3 ra))
+                       maxx (max maxx (+ x3 ra))
+                       maxy (max maxy (+ y3 ra))
+                 ) ;end setq
+          ) ;end progn else
+        ) ;end if
+      ) ;end repeat
+      (setq pu-p1 (list minx miny)
+            pu-p2 (list maxx maxy)
+      ) ;_ end of setq
+    ) ;_ end of progn
+    (progn 
+      (alert "\nNo selection or Only entity on '41' layer!")
+      (command "zoom" "p")
+      (exit)
+    ) ;_ end of progn
+  ) ;end if ss1
+) ;end bound-sub
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun cc (ss / nam i tb p1 len inc) 
   (angset)
@@ -625,6 +734,18 @@
   (princ)
 ) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun line-start-point (line-name / tab) 
+  (setq tab   (entget line-name)
+        pu-pt (cdr (assoc 10 tab))
+  ) ;_ end of setq
+) ;_ end of defun
+
+(defun line-end-point (line-name / tab) 
+  (setq tab   (entget line-name)
+        pu-pt (cdr (assoc 11 tab))
+  ) ;_ end of setq
+) ;_ end of defun
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun is-entity-locked (ename / la fl) 
   (setq la (get-layer ename)
         fl (cdr (assoc 70 (tblsearch "LAYER" la)))
@@ -666,6 +787,40 @@
     ) ;_ end of progn
   ) ;_ end of if
 ) ;_ end of defun
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun scale (/ lfac ans ceco) 
+  (setq lfac (getvar "dimlfac")
+        ceco (getvar "cecolor")
+        ans  ""
+  ) ;end setq
+  (if (/= lfac 1) 
+    (progn 
+      (while (AND (/= ans "N") (/= ans "Y")) 
+             (setq ans (strcase 
+                         (getstring 
+                           (strcat "\nDimlfac = " 
+                                   (rtos lfac 2 2)
+                                   ", go on...?(Y/N)"
+                           ) ;_ end of strcat
+                         ) ;_ end of getstring
+                       ) ;_ end of strcase
+             ) ;end setq
+             (if (= ans "N") 
+               (progn 
+                 (setvar "dimlfac" 1)
+                 (command "color" "bylayer")
+               ) ;end progn then
+             ) ;end if  (= ans "N")
+             (if (= ans "Y") 
+               (command "color" "cyan")
+             ) ;end if (= ans "Y")
+      ) ;end while
+    ) ;end progn then
+    (progn 
+      (command "color" "bylayer")
+    ) ;end progn else
+  ) ;end if (/= lfac 1.0)
+) ;end defun scale
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun select-object (text type1 / s ent-name) 
   (while 
