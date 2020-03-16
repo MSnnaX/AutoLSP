@@ -549,6 +549,49 @@
   (princ)
 ) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun c:SCA (/ DS S1 txt a sc te lfac pt1 pt2 pt3 pt4) 
+  (setierr)
+  (SETQ S1   (GETVAR "DIMSCALE")
+        txt  (getvar "dimtxt")
+        DS   (* S1 txt)
+        lfac (rtos (/ 1 (getvar "dimlfac")) 2 0)
+        a    (strcase (getstring "\nPart<A>:"))
+        sc   (getint (strcat "\nScale<" lfac ">:"))
+        pt1  (getpoint "\nInput insert point:")
+        pt2  (list (+ (car pt1) (* ds 13)) 
+                   (- (cadr pt1) (* ds 3))
+             ) ;_ end of list
+        pt3  (list (+ (car pt1) (* ds 2.6)) 
+                   (/ (+ (cadr pt1) (cadr pt2)) 2)
+             ) ;_ end of list
+        pt4  (list (- (car pt2) (* ds 2.6)) 
+                   (/ (+ (cadr pt1) (cadr pt2)) 2)
+             ) ;_ end of list
+  ) ;_ end of SETQ
+  (if (or (= a "A") (= a "")) 
+    (setq a "A")
+  ) ;_ end of if
+  (if (or (= sc (atoi lfac)) (= sc nil)) 
+    (setq sc lfac)
+    (setq sc (itoa sc))
+  ) ;_ end of if
+  (COMMAND "_mtext" 
+           pt1
+           "h"
+           ds
+           "j"
+           "mc"
+           pt2
+           (strcat "DETAIL " a)
+           (STRCAT "SCALE " sc ":1")
+           ""
+  ) ;_ end of COMMAND
+  (COMMAND "LINE" PT3 PT4 "")
+  (command "move" "c" pt1 pt2 "" "@" pause)
+  (reerr)
+  (PRINC)
+) ;_ end of DEFUN
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;The sub Key                                                                                                 ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
