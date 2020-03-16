@@ -98,6 +98,7 @@
   (command "ucs" "w")
   (layer-41)
   (scale)
+  (setvar "dimtad" 1)
   (setq lfac (getvar "DIMLFAC"))
   (prompt "\nSelect chamfer line:")
   (setq ss_li       (ssget '((0 . "LINE")))
@@ -159,14 +160,11 @@
           (setq s1 2.5)
         ) ;end progn
       ) ;end if
-      (SETQ S (* S1 tx)
-            a (* ta lfac)
-      )
-      (if (> a 0.99) 
-        (setq a (RtoS a 2 0))
-        (setq a (RtoS a 2 1))
-      )
-      (setq ltyp (cdr (assoc 6 (entget name))))
+      (SETQ S    (* S1 tx)
+            a    (* ta lfac)
+            a    (RtoS a 2 1)
+            ltyp (cdr (assoc 6 (entget name)))
+      ) ;_ end of SETQ
       (if (not ltyp) 
         (setq ltyp "BYLAYER")
       ) ;_ end of if
