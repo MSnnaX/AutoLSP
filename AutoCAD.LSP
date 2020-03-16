@@ -1,5 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;The Main Key                                                                                                ;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun c:CM (/ d i c1 sel nam tab cen ra lt cel lay cur len1 len2 lanam j latab p1 p2) 
   (setierr)
@@ -237,6 +239,50 @@
   (setvar "cecolor" "bylayer")
   (command "ucs" "p")
   (Reerr)
+  (princ)
+) ;_ end of defun
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun c:DT (/ ss) 
+  (setierr)
+  (if (setq ss (ssget '((0 . "DIMENSION")))) 
+    (if (is-ss-unlocked ss) 
+      (progn 
+        (setq up  (rtos (getREAL "\nEnter Upper Value:") 2 3)
+              low (rtos (- (getreal "\nEnter Lower Value:")) 2 3)
+        ) ;_ end of setq
+        (command "dimoverride" 
+                 "dimdec"
+                 "3"
+                 "dimzin"
+                 "8"
+                 "dimtdec"
+                 "3"
+                 "dimtzin"
+                 "8"
+                 "dimtol"
+                 "on"
+                 "dimtfac"
+                 "0.7"
+                 "dimtp"
+                 up
+                 "dimtm"
+                 low
+                 ""
+                 ss
+                 ""
+        ) ;_ end of command
+      ) ;_ end of progn
+      (alert "All locked!")
+    ) ;_ end of if
+    (alert "No Selected!")
+  ) ;_ end of if
+  (reerr)
+  (princ)
+) ;_ end of defun
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun c:DTS () 
+  (setq val (getstring "Enter Tolerance Value {symmetrical}:"))
+  (tole7 val val)
   (princ)
 ) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -506,6 +552,7 @@
 ) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;The sub Key                                                                                                 ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun angset () 
@@ -746,6 +793,38 @@
   (princ)
 ) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(SetQ **SysVarNL** '("AUNITS" "AUPREC" "ATTDIA" "CECOLOR" "CELTYPE" "CMDECHO" 
+                     "EXPERT" "HIGHLIGHT" "LUNITS" "LUPREC" "OSMODE" "ORTHOMODE" 
+                     "TEXTSTYLE" "PLINEWID" "DIMPOST")
+) ;_ end of SetQ
+
+(Defun-Q SetIErr (/ sv) 
+  (If (= 'LIST (Type *error*)) 
+    (Alert "错误：最后一个(SetIErr)函数没有配对的(ReErr)!")
+    (Progn (SetQ **svarl** '()) 
+           (ForEach sv **SysVarNL** 
+             (SetQ **svarl** (Cons (GetVar sv) **svarl**))
+           ) ;_ end of ForEach
+           (ForEach sv 
+             '("ATTDIA" "BLIPMODE" "CMDECHO" ;"HIGHLIGHT"
+              "OSMODE" "ORTHOMODE")
+             (SetVar sv 0)
+           ) ;_ end of ForEach
+           (Defun-Q *error* (st) (ReErr))
+    ) ;_ end of Progn
+  ) ;_ end of If
+) ;_ end of Defun-Q
+
+(Defun-Q ReErr () 
+  (If (= 'LIST (Type *error*)) 
+    (Progn (MapCar 'SetVar **SysVarNL** (Reverse **svarl**)) 
+           (SetQ *error* nil)
+           (SetVar "modemacro" ".")
+           (PrinC)
+    ) ;_ end of Progn
+    (Alert "错误：没有对应的(SetIErr)!")
+  ) ;_ end of If
+) ;_ end of Defun-Q
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
