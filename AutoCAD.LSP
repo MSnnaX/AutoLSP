@@ -3,6 +3,15 @@
 ;The Main Key                                                                                                ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun c:CC (/ cir) 
+  (setvar "cmdecho" 1)
+  (command "circle" pause pause)
+  (setvar "cmdecho" 0)
+  (setq cir (ssget "l"))
+  (cm cir)
+  (princ)
+) ;_ end of defun
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun c:CM (/ d i c1 sel nam tab cen ra lt cel lay cur len1 len2 lanam j latab p1 p2) 
   (setierr)
   (if 
@@ -455,6 +464,43 @@
   (princ)
 ) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun c:FA (/ ca s en1 en2 p1 p2 p3 p4 tab1 tab2 p-int ca) 
+  (setierr)
+  (command "ucs" "w")
+  (angset)
+  (setq en1  (car (select-object "the fist line" "LINE"))
+        en2  (car (select-object "the second line" "LINE"))
+        la   (get-layer en1)
+        o_la (getvar "clayer")
+  ) ;_ end of setq
+  (setvar "clayer" la)
+  (setq tab1  (entget en1)
+        p1    (cdr (assoc 10 tab1))
+        p2    (cdr (assoc 11 tab1))
+        tab2  (entget en2)
+        p3    (cdr (assoc 10 tab2))
+        p4    (cdr (assoc 11 tab2))
+        p-int (inters p1 p2 p3 p4 nil)
+        ca    (/ 
+                (min 
+                  (min (distance p-int p1) (distance p-int p2))
+                  (min (distance p-int p3) (distance p-int p4))
+                ) ;_ end of min
+                2
+              ) ;_ end of /
+  ) ;_ end of setq
+  (command "color" "red")
+  (command "line" p-int (polar p-int (angle p-int p1) ca) "")
+  (command "line" p-int (polar p-int (angle p-int p3) ca) "")
+  (redraw en1 4)
+  (redraw en2 4)
+  (setvar "clayer" o_la)
+  (setvar "cecolor" "bylayer")
+  (command "ucs" "p")
+  (reerr)
+  (princ)
+) ;_ end of defun
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun c:FC () 
   (SCALE)
   (layer-41)
@@ -583,6 +629,16 @@
            (strcat "SEE DETAIL " part)
            ""
   ) ;_ end of command
+  (princ)
+) ;_ end of defun
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun c:M0 () 
+  (lt-change "Lessen" 0.5)
+  (princ)
+) ;_ end of defun
+
+(defun c:M2 () 
+  (lt-change "Augment" 2)
   (princ)
 ) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -923,7 +979,7 @@
   (princ)
 ) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun c:T0 (/ sel i)
+(defun c:T0 (/ sel i) 
   (setierr)
   (if 
     (not 
@@ -953,7 +1009,7 @@
   (princ)
 ) ;_ end of defun
 
-(defun c:T1 (/ sel)
+(defun c:T1 (/ sel) 
   (setierr)
   (setq i 0)
   (if (setq sel (ssget '((0 . "DIMENSION")))) 
@@ -968,6 +1024,24 @@
     ) ;_ end of if
     (alert "No selection!")
   ) ;_ end of if
+  (reerr)
+  (princ)
+) ;_ end of defun
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun c:TE (/ sca) 
+  (if (tblsearch "style" "SIMPLEX") 
+    (command "style" "SIMPLEX" "" "" "" "" "" "" "")
+    (command "style" "SIMPLEX" "SIMPLEX" "" "" "" "" "" "")
+  ) ;_ end of if
+  (setierr)
+  (if (= (getvar "dimscale") 0) 
+    (setvar "dimscale" 1)
+  ) ;_ end of if
+  (setq sca (getvar "dimscale")
+        sca (* sca (getvar "dimtxt"))
+  ) ;_ end of setq
+  (COMMAND "_text" PAUSE sca "0" "Detail 1:1")
+  (COMMAND "_ddedit" "L" "")
   (reerr)
   (princ)
 ) ;_ end of defun
@@ -1177,32 +1251,6 @@
   ) ;_ end of setq
 ) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun layer-41 (/ c) 
-  (setq c (getvar "cmdecho"))
-  (setvar "cmdecho" 0)
-  (if (tblsearch "layer" "41") 
-    (progn 
-      (command "layer" "on" "41" "u" "41" "T" "41" "")
-      (setvar "clayer" "41")
-    ) ;_ end of progn
-    (command "layer" "n" "41" "c" 3 "41" "s" "41" "")
-  ) ;_ end of if
-  (setvar "cmdecho" c)
-  (princ)
-) ;_ end of defun
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun line-start-point (line-name / tab) 
-  (setq tab   (entget line-name)
-        pu-pt (cdr (assoc 10 tab))
-  ) ;_ end of setq
-) ;_ end of defun
-
-(defun line-end-point (line-name / tab) 
-  (setq tab   (entget line-name)
-        pu-pt (cdr (assoc 11 tab))
-  ) ;_ end of setq
-) ;_ end of defun
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun is-entity-locked (ename / la fl) 
   (setq la (get-layer ename)
         fl (cdr (assoc 70 (tblsearch "LAYER" la)))
@@ -1243,6 +1291,64 @@
       (exit)
     ) ;_ end of progn
   ) ;_ end of if
+) ;_ end of defun
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun layer-41 (/ c) 
+  (setq c (getvar "cmdecho"))
+  (setvar "cmdecho" 0)
+  (if (tblsearch "layer" "41") 
+    (progn 
+      (command "layer" "on" "41" "u" "41" "T" "41" "")
+      (setvar "clayer" "41")
+    ) ;_ end of progn
+    (command "layer" "n" "41" "c" 3 "41" "s" "41" "")
+  ) ;_ end of if
+  (setvar "cmdecho" c)
+  (princ)
+) ;_ end of defun
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun line-start-point (line-name / tab) 
+  (setq tab   (entget line-name)
+        pu-pt (cdr (assoc 10 tab))
+  ) ;_ end of setq
+) ;_ end of defun
+
+(defun line-end-point (line-name / tab) 
+  (setq tab   (entget line-name)
+        pu-pt (cdr (assoc 11 tab))
+  ) ;_ end of setq
+) ;_ end of defun
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun lt-change (text scale / esel nam tab lsc i) 
+  (setierr)
+  (princ (strcat "选取线型比例" text "的实体[可复选]:"))
+  (setq esel (ssget 
+               '((-4 . "<OR")
+                 (0 . "LINE")
+                 (0 . "CIRCLE")
+                 (0 . "ARC")
+                 (-4 . "OR>")
+                )
+             ) ;end ssget
+        i    0
+  ) ;_ end of setq
+  (if esel 
+    (repeat (sslength esel) 
+      (setq nam (ssname esel i)
+            tab (entget nam)
+      ) ;_ end of setq
+      (if (assoc 48 tab) 
+        (setq lsc (cdr (assoc 48 tab)))
+        (setq lsc 1.0)
+      ) ;end if
+      (setq lsc (* lsc scale)
+            i   (+ i 1)
+      ) ;end setq
+      (command "change" nam "" "p" "s" lsc "")
+    ) ;end repeat
+    (alert "No Selected!")
+  ) ;end if
+  (reerr)
 ) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun scale (/ lfac ans ceco) 
