@@ -1233,6 +1233,67 @@
   (princ)
 ) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun cm (ss3 / d i c1 nam tab cen ra lt cel lay cur len1 len2 lanam j latab p1 p2) 
+  (command "ucs" "w")
+  (setq d   (getvar "dimscale")
+        cur (getvar "clayer")
+  ) ;_ end of setq
+  (if (= d 0) 
+    (setvar "dimscale" 1)
+  ) ;_ end of if
+  (setq i   0
+        sel (ssadd)
+  ) ;_ end of setq
+  (if (= (type ss3) 'ename) 
+    (ssadd ss3 sel)
+    (setq sel ss3)
+  ) ;_ end of if
+  (repeat (sslength sel) 
+    (setq nam (ssname sel i)
+          tab (entget nam)
+          cen (cdr (assoc 10 tab)) ;Center
+          px  (car cen)
+          py  (cadr cen)
+          c1  (list (+ 0.005 px) (+ 0.005 py))
+          i   (+ i 1)
+          ra  (cdr (assoc 40 tab)) ;radius
+          lay (cdr (assoc 8 tab)) ;layer
+          lt  (getvar "ltscale")
+          cel (/ (* ra 0.5) lt)
+          dsc (/ 1 (getvar "dimscale"))
+          nam (list nam cen)
+          j   0
+    ) ;_ end of setq
+    (setvar "celtscale" cel)
+    (setvar "clayer" lay)
+    (setvar "dimcen" (* ra 1.2 dsc))
+    (COMMAND "DIMCENTER" nam)
+    (setq la   (ssget "c" cen c1 '((0 . "LINE")))
+          len1 (* ra 2.4)
+    ) ;_ end of setq
+    (repeat (sslength la) 
+      (setq lanam (ssname la j)
+            latab (entget lanam)
+            p1    (cdr (assoc 10 latab))
+            p2    (cdr (assoc 11 latab))
+            len2  (distance p1 p2)
+            j     (+ j 1)
+      ) ;_ end of setq
+      (if (> (abs (- len1 len2)) 0.001) 
+        (progn 
+          (setq la (ssdel lanam la)
+                j  (- j 1)
+          ) ;_ end of setq
+        ) ;_ end of progn
+      ) ;_ end of if
+    ) ;_ end of repeat
+    (ce la)
+  ) ;_ end of repeat
+  (command "ucs" "p")
+  (setvar "clayer" cur)
+  (princ)
+) ;_ end of defun
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun get-layer (sname / tab) 
   (setq tab           (entget sname)
         pu_layer_name (cdr (assoc 8 tab))
