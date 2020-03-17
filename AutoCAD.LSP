@@ -389,6 +389,21 @@
   (princ)
 ) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun c:LS (/ part) 
+  (setq part (strcase (getstring "Part<A>:")))
+  (if (= part "") 
+    (setq part "A")
+  ) ;_ end of if
+  (command "leader" 
+           pause
+           pause
+           ""
+           (strcat "SEE DETAIL " part)
+           ""
+  ) ;_ end of command
+  (princ)
+) ;_ end of defun
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun c:MC (/) 
   (setierr)
   (command "ucs" "w")
@@ -428,6 +443,53 @@
   (Reerr)
   (princ)
 ) ;_ end of defun mc
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun c:PCD (/ NAM CIR STR TOH TAD OFL) 
+  (setierr)
+  (layer-41)
+  (command "ucs" "w")
+  (SETQ CIR (select-object-two "circle" "CIRCLE" "arc" "ARC")
+        nam (car cir)
+        str (strcat "P.C.D. %%c" "<>")
+        toh (getvar "dimtoh")
+        tad (getvar "dimtad")
+        ofl (getvar "dimtofl")
+  )
+  (command "_dimtoh" 
+           "on"
+           "_dimtad"
+           "1"
+           "_dimtofl"
+           "on"
+           "dimpost"
+           STR
+  )
+  (scale)
+  (COMMAND "DIMDIAMETER" CIR PAUSE)
+  (setvar "cecolor" "bylayer")
+  (command "_dimtoh" 
+           toh
+           "_dimtad"
+           tad
+           "_dimtofl"
+           ofl
+           "dimpost"
+           "."
+  )
+  (redraw nam 4)
+  (command "ucs" "p")
+  (Reerr)
+  (princ)
+)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun c:Q1 () 
   (sub-qz "1-")
@@ -549,7 +611,29 @@
   (princ)
 ) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun c:SCA (/ DS S1 txt a sc te lfac pt1 pt2 pt3 pt4) 
+(defun c:REF (/ ob tb va) 
+  (setierr)
+  (setq ob (car (entsel))
+        tb (entget ob)
+        va (cdr (assoc 1 tb))
+  ) ;_ end of setq
+  (if (not (is-entity-locked ob)) 
+    (progn 
+      (if (= va "") 
+        (setq va "<>")
+      ) ;_ end of if
+      (setq va (strcat "(" va ")"))
+      (setq tb (subst (cons 1 va) (assoc 1 tb) tb))
+      (entmod tb)
+      (entupd ob)
+    ) ;_ end of progn
+    (alert "Locked!")
+  ) ;_ end of if
+  (reerr)
+  (princ)
+) ;_ end of defun
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun c:SL (/ DS S1 txt a sc te lfac pt1 pt2 pt3 pt4) 
   (setierr)
   (SETQ S1   (GETVAR "DIMSCALE")
         txt  (getvar "dimtxt")
@@ -590,7 +674,81 @@
   (command "move" "c" pt1 pt2 "" "@" pause)
   (reerr)
   (PRINC)
-) ;_ end of DEFUN
+) ;_ end of defun
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun c:ST (/ ss i e_name x_13 y_13 x_14 y_14 pt_14) 
+  (setierr)
+  (if 
+    (NOT 
+      (setq ss (ssget "i" 
+                      '((-4 . "<OR")
+                        (70 . 38)
+                        (70 . 102)
+                        (70 . 230)
+                        (70 . 166)
+                        (-4 . "OR>")
+                       )
+               ) ;_ end of ssget
+      ) ;_ end of setq
+    ) ;_ end of NOT
+    (setq ss (ssget 
+               '((-4 . "<OR")
+                 (70 . 38)
+                 (70 . 102)
+                 (70 . 230)
+                 (70 . 166)
+                 (-4 . "OR>")
+                )
+             ) ;_ end of ssget
+    ) ;_ end of setq
+  ) ;_ end of if
+  (command "ucs" "w")
+  (setq i 0)
+  (if ss 
+    (if (is-ss-unlocked ss) 
+      (repeat (sslength ss) 
+        (setq e_name (ssname ss i)
+              x_13   (car (get-value e_name 13))
+              y_13   (cadr (get-value e_name 13))
+              x_14   (car (get-value e_name 14))
+              y_14   (cadr (get-value e_name 14))
+              i      (1+ i)
+        ) ;_ end of setq
+        (if 
+          (or (= (get-value e_name 70) 166) 
+              (= (get-value e_name 70) 38)
+          ) ;_ end of or
+          (progn 
+            (if (< (abs (- y_13 y_14)) 1) 
+              (progn 
+                (setq pto_14 (list x_14 (+ 3 y_14) 0)
+                      pt_14  (list x_14 y_13 0)
+                ) ;_ end of setq
+              ) ;_ end of progn
+              (setq pt_14 (list x_14 y_13 0.0))
+            ) ;_ end of if
+          ) ;_ end of progn
+          (progn 
+            (if (< (abs (- x_13 x_14)) 1) 
+              (progn 
+                (setq pto_14 (list (+ x_14 3) y_14 0)
+                      pt_14  (list x_13 y_14 0)
+                ) ;_ end of setq
+              ) ;_ end of progn
+              (setq pt_14 (list x_13 y_14 0.0))
+            ) ;_ end of if
+          ) ;_ end of progn
+        ) ;_ end of if
+        (change-value e_name 14 pt_14)
+      ) ;_ end of repeat
+      (alert "All locked!")
+    ) ;_ end of if
+    (alert "\nNo selection!")
+  ) ;_ end of if
+  (command "ucs" "p")
+  (reerr)
+  (princ)
+) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;The sub Key                                                                                                 ;
@@ -759,6 +917,12 @@
         pub_type (cdr (assoc 0 tab))
   ) ;_ end of setq
 ) ;_ end of defun
+
+(defun get-value (name tag / tab) 
+  (setq tab   (entget name)
+        value (cdr (assoc tag tab))
+  ) ;_ end of setq
+) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun layer-41 (/ c) 
   (setq c (getvar "cmdecho"))
@@ -874,6 +1038,28 @@
       ) ;_ end of progn
     ) ;_ end of not
     (alert (strcat "\nMust " text " , go on..."))
+  ) ;_ end of while
+  (redraw (car ent-name) 3)
+  ent-name
+) ;_ end of defun
+
+(defun select-object-two (text1 type1 text2 type2 / s ent-name) 
+  (while 
+    (not 
+      (progn 
+        (setq ent-name (entsel 
+                         (strcat "\nSelect a " text1 " or " text2 ":")
+                       ) ;_ end of entsel
+        ) ;_ end of setq
+        (if ent-name 
+          (or (= (get-type (car ent-name)) type1) 
+              (= (get-type (car ent-name)) type2)
+          ) ;_ end of or
+          nil
+        ) ;_ end of if
+      ) ;_ end of progn
+    ) ;_ end of not
+    (alert (strcat "\nMust " text1 " or " text2 " , go on..."))
   ) ;_ end of while
   (redraw (car ent-name) 3)
   ent-name
