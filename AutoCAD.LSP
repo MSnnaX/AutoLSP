@@ -92,6 +92,155 @@
   (PRINC)
 ) ;_ end of DEFUN
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun c:D0 (/ di) 
+  (ch_precision 0)
+) ;_ end of defun
+
+(defun c:D1 (/) 
+  (ch_precision 1)
+) ;_ end of defun
+
+(defun c:D2 (/) 
+  (ch_precision 2)
+) ;_ end of defun
+
+(defun c:D3 (/) 
+  (ch_precision 3)
+) ;_ end of defun
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun c:DA () 
+  (layer-41)
+  (setvar "dimtad" 1)
+  (command "DIMANGULAR")
+  (princ)
+) ;_ end of defun
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun c:DAL () 
+  (layer-41)
+  (scale)
+  (command "DIMALIGNED")
+  (princ)
+) ;_ end of defun
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun c:DB () 
+  (layer-41)
+  (setvar "dimtad" 0)
+  (command "dimbaseline")
+  (princ)
+)
+
+(defun c:DBS (/ dim nam tab pt1 vla-obj sc sc_dl hei ss nam1 lss) 
+  (setierr)
+  (command "ucs" "w")
+  (layer-41)
+  (while 
+    (if nam 
+      (if (= (get-type nam) "DIMENSION") 
+        nil
+        (progn 
+          (alert "\nType error!")
+          t
+        ) ;_ end of progn
+      ) ;_ end of if
+      t
+    ) ;_ end of if
+    (while 
+      (not 
+        (setq dim (entsel "\nSelect a Dimension:")
+              nam (car dim)
+        ) ;_ end of setq
+      ) ;_ end of not
+      (alert "\nNo selection!")
+    ) ;_ end of while
+  ) ;_ end of while
+  (setq tab (entget nam)
+        pt1 (cdr (assoc 10 tab))
+  ) ;_ end of setq
+  (command "ucs" "n" pt1)
+  (vl-load-com)
+  (setq vla-obj (vlax-ename->vla-object nam)
+        sc_dl   (vla-get-LinearScaleFactor vla-obj)
+        sc      (vla-get-ScaleFactor vla-obj)
+        hei     (* sc (vla-get-TextHeight vla-obj))
+  ) ;_ end of setq
+  (setvar "dimscale" (/ hei (getvar "dimtxt")))
+  (command "zoom" "e")
+  (command "dimlinear" "0,0" "0,1.2345" "1,1.2345")
+  (setq lss (ssget "l" '((0 . "DIMENSION"))))
+  (if (not (= (sslength lss) 1)) 
+    (progn 
+      (alert "\nFail!")
+      (exit)
+    ) ;_ end of progn
+  ) ;_ end of if
+  (setq lnam (ssname lss 0)
+        ltab (entget lnam)
+        lv   (cdr (assoc 42 ltab))
+        dlf  (getvar "dimlfac")
+        lvc  (* 1.2345 dlf)
+  ) ;_ end of setq
+  (if (equal lv lvc 0.001) 
+    (command "erase" lss "")
+    (alert "\nFail!")
+  ) ;_ end of if
+  (command "zoom" "p")
+  (if (= sc_dl 1) 
+    (setvar "dimlfac" 1)
+    (progn 
+      (command "change" dim "" "p" "c" "cyan" "")
+      (setvar "dimlfac" sc_dl)
+      (alert (strcat "\nCurrent dimlfac is " (rtos sc_dl 2 2)))
+    ) ;_ end of progn
+  ) ;_ end of if
+  (setvar "osmode" 679)
+  (command "_dimbaseline" dim)
+  (reerr)
+  (princ)
+) ;_ end of defun
+
+(defun c:DOS (/ nam namtyp tab pt1 hei vla-obj sc sc_dl) 
+  (setierr)
+  (command "ucs" "w")
+  (setvar "osmode" 679)
+  (layer-41)
+  (scale)
+  (setq nam nil)
+  (while (= nam nil) 
+         (while (= nam nil) 
+                (setq nam (car (entsel "\nSelect a Dimension:")))
+         ) ;_ end of while
+         (setq namtyp (cdr (assoc 0 (entget nam)))) ;_ end of setq
+         (if (not (= namtyp "DIMENSION")) 
+           (setq nam nil)
+         ) ;_ end of if
+  ) ;_ end of while
+  (setq tab (entget nam)
+        pt1 (cdr (assoc 10 tab))
+  ) ;_ end of setq
+  (command "ucs" "n" pt1)
+  (vl-load-com)
+  (setq vla-obj (vlax-ename->vla-object nam)
+        sc_dl   (vla-get-LinearScaleFactor vla-obj)
+        sc      (vla-get-ScaleFactor vla-obj)
+        hei     (* sc (vla-get-TextHeight vla-obj))
+  ) ;_ end of setq
+  (if (= sc_dl 1) 
+    (setvar "dimlfac" 1)
+    (progn 
+      (setvar "dimlfac" sc_dl)
+      (alert (strcat "\nCurrent dimlfac is " (rtos sc_dl 2 2)))
+    ) ;_ end of progn
+  ) ;_ end of if
+  (setvar "dimscale" (/ hei (getvar "dimtxt")))
+  (setvar "cmdecho" 1)
+  (setvar "dimtad" 0)
+  (command "_dimordinate" pause pause)
+  (setvar "cmdecho" 0)
+  (setvar "cecolor" "bylayer")
+  (reerr)
+  (princ)
+) ;_ end of defun
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun c:DC (/ i ss_li name p0 p1 p2 p1x p2x p1y p2y tab typ ss i count na ang dis 
              angle_count tp1x tp2x tp1y tp2y ta ltyp) 
   (setierr)
@@ -240,6 +389,28 @@
   (princ)
 ) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun c:DL (/ os) 
+  (scale)
+  (layer-41)
+  (setvar "osmode" 679)
+  (setvar "dimtad" 1)
+  (command "dimlinear" pause pause pause)
+  (setvar "cecolor" "bylayer")
+  (princ)
+) ;_ end of defun
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun c:DO () 
+  (setierr)
+  (scale)
+  (layer-41)
+  (setvar "osmode" 679)
+  (setvar "dimtad" 0)
+  (command "_dimordinate" pause pause)
+  (setvar "cecolor" "bylayer")
+  (reerr)
+  (princ)
+) ;_ end of defun
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun c:DT (/ ss) 
   (setierr)
   (if (setq ss (ssget '((0 . "DIMENSION")))) 
@@ -282,6 +453,17 @@
   (setq val (getstring "Enter Tolerance Value {symmetrical}:"))
   (tole7 val val)
   (princ)
+) ;_ end of defun
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun c:FC () 
+  (SCALE)
+  (layer-41)
+  (setvar "cmdecho" 1)
+  (setvar "dimtad" 1)
+  (COMMAND "_dimlinear" PAUSE PAUSE "T" "%%C<>" PAUSE)
+  (setvar "cmdecho" 0)
+  (setvar "cecolor" "bylayer")
+  (PRINC)
 ) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun c:HD (/ str ob tb va b ename) 
@@ -443,15 +625,6 @@
   (Reerr)
   (princ)
 ) ;_ end of defun mc
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun c:PCD (/ NAM CIR STR TOH TAD OFL) 
   (setierr)
@@ -750,6 +923,55 @@
   (princ)
 ) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun c:T0 (/ sel i)
+  (setierr)
+  (if 
+    (not 
+      (or (setq sel (ssget "_i" '((0 . "DIMENSION")))) 
+          (setq sel (ssget "l" '((0 . "DIMENSION"))))
+      ) ;_ end of or
+    ) ;_ end of not
+    (progn 
+      (princ "\nSelect a Dimension:")
+      (setq sel (ssget '((0 . "DIMENSION"))))
+    ) ;_ end of progn
+  ) ;_ end of if
+  (setq i 0)
+  (if sel 
+    (if (is-ss-unlocked sel) 
+      (repeat (sslength sel) 
+        (setq di (ssname sel i)
+              i  (+ i 1)
+        ) ;_ end of setq
+        (command "DIMOVERRIDE" "dimtoh" 0 "dimfit" 3 "" di "")
+      ) ;_ end of repeat
+      (alert "All locked!")
+    ) ;_ end of if
+    (alert "No selection!")
+  ) ;_ end of if
+  (reerr)
+  (princ)
+) ;_ end of defun
+
+(defun c:T1 (/ sel)
+  (setierr)
+  (setq i 0)
+  (if (setq sel (ssget '((0 . "DIMENSION")))) 
+    (if (is-ss-unlocked sel) 
+      (repeat (sslength sel) 
+        (setq di (ssname sel i)
+              i  (+ i 1)
+        ) ;_ end of setq
+        (command "DIMOVERRIDE" "dimtoh" 1 "dimfit" 3 "" di "")
+      ) ;_ end of repeat
+      (alert "All locked!")
+    ) ;_ end of if
+    (alert "No selection!")
+  ) ;_ end of if
+  (reerr)
+  (princ)
+) ;_ end of defun
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;The sub Key                                                                                                 ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -904,6 +1126,37 @@
   ) ;_ end of setq
   (entmod tab)
   (entupd e-name)
+) ;_ end of defun
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun ch_Precision (num / sel di) 
+  (setierr)
+  (setq i 0)
+  (if (setq sel (ssget '((0 . "DIMENSION")))) 
+    (if (is-ss-unlocked sel) 
+      (repeat (sslength sel) 
+        (setq di (ssname sel i)
+              i  (1+ i)
+        ) ;_ end of setq
+        (command "dimoverride" 
+                 "dimzin"
+                 "0"
+                 "dimazin"
+                 "0"
+                 "dimdec"
+                 num
+                 "dimadec"
+                 num
+                 ""
+                 di
+                 ""
+        ) ;_ end of command
+      ) ;_ end of repeat
+      (alert "All locked!")
+    ) ;_ end of if
+    (alert "No selection!")
+  ) ;_ end of if
+  (reerr)
+  (princ)
 ) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun get-layer (sname / tab) 
