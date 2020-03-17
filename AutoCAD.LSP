@@ -99,7 +99,7 @@
   (command "ucs" "p")
   (Reerr)
   (PRINC)
-) ;_ end of DEFUN
+) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun c:D0 (/ di) 
   (ch_precision 0)
@@ -136,7 +136,7 @@
   (setvar "dimtad" 0)
   (command "dimbaseline")
   (princ)
-)
+) ;_ end of defun
 
 (defun c:DBS (/ dim nam tab pt1 vla-obj sc sc_dl hei ss nam1 lss) 
   (setierr)
@@ -685,7 +685,7 @@
   (command "ucs" "p")
   (Reerr)
   (princ)
-) ;_ end of defun mc
+) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun c:PCD (/ NAM CIR STR TOH TAD OFL) 
   (setierr)
@@ -723,7 +723,7 @@
   (command "ucs" "p")
   (Reerr)
   (princ)
-)
+) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun c:Q1 () 
   (sub-qz "1-")
@@ -1078,7 +1078,7 @@
             ) ;end ssget
   ) ;end setq
   (bound-sub ss1)
-) ;_ end of defun bound-c
+) ;_ end of defun
 
 (defun bound-c-line (line-name / p1 p2 p3 p4 do) 
   (setq p1 (line-start-point line-name)
@@ -1108,7 +1108,7 @@
   (setq pu-p1 p1
         pu-p2 p2
   ) ;_ end of setq
-) ;_ end of defun bound-c-line
+) ;_ end of defun
 
 (defun bound-sub (ss1 / i typ name tab pt3 pt4 x3 y3 x4 y4 ra minx miny maxx maxy) 
   (setq i    0
