@@ -3,7 +3,7 @@
 ;The Main Key                                                                                                ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun c:CC (/ cir) 
+(defun c:CC (/ cir)  ;添加带有中心线的圆
   (setvar "cmdecho" 1)
   (command "circle" pause pause)
   (setvar "cmdecho" 0)
@@ -12,7 +12,7 @@
   (princ)
 ) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun c:CM (/ d i c1 sel nam tab cen ra lt cel lay cur len1 len2 lanam j latab p1 p2) 
+(defun c:CM (/ d i c1 sel nam tab cen ra lt cel lay cur len1 len2 lanam j latab p1 p2)  ;添加中心线
   (setierr)
   (if 
     (not 
@@ -101,44 +101,45 @@
   (PRINC)
 ) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun c:D0 (/ di) 
+(defun c:D0 (/ di)  ;0位小数
   (ch_precision 0)
 ) ;_ end of defun
 
-(defun c:D1 (/) 
+(defun c:D1 (/)  ;1位小数
   (ch_precision 1)
 ) ;_ end of defun
 
-(defun c:D2 (/) 
+(defun c:D2 (/)  ;2位小数
   (ch_precision 2)
 ) ;_ end of defun
 
-(defun c:D3 (/) 
+(defun c:D3 (/)  ;3位小数
   (ch_precision 3)
 ) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun c:DA () 
+(defun c:DA ()  ;添加角度尺寸
   (layer-41)
+  ;(scale)
   (setvar "dimtad" 1)
   (command "DIMANGULAR")
   (princ)
 ) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun c:DAL () 
+(defun c:DAL ()  ;添加对其尺寸
   (layer-41)
-  (scale)
+  ;(scale)
   (command "DIMALIGNED")
   (princ)
 ) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun c:DB () 
+(defun c:DB ()  ;添加基线尺寸
   (layer-41)
   (setvar "dimtad" 0)
   (command "dimbaseline")
   (princ)
 ) ;_ end of defun
-
-(defun c:DBS (/ dim nam tab pt1 vla-obj sc sc_dl hei ss nam1 lss) 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun c:DBS (/ dim nam tab pt1 vla-obj sc sc_dl hei ss nam1 lss)  ;添加自动对齐坐标尺寸-单向
   (setierr)
   (command "ucs" "w")
   (layer-41)
@@ -207,12 +208,12 @@
   (princ)
 ) ;_ end of defun
 
-(defun c:DOS (/ nam namtyp tab pt1 hei vla-obj sc sc_dl) 
+(defun c:DOS (/ nam namtyp tab pt1 hei vla-obj sc sc_dl)  ;添加手动放置坐标尺寸-单向
   (setierr)
   (command "ucs" "w")
   (setvar "osmode" 679)
   (layer-41)
-  (scale)
+  ;(scale)
   (setq nam nil)
   (while (= nam nil) 
          (while (= nam nil) 
@@ -250,12 +251,12 @@
   (princ)
 ) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun c:DC (/ i ss_li name p0 p1 p2 p1x p2x p1y p2y tab typ ss i count na ang dis 
+(defun c:DC (/ i ss_li name p0 p1 p2 p1x p2x p1y p2y tab typ ss i count na ang dis ;添加45°倒角尺寸
              angle_count tp1x tp2x tp1y tp2y ta ltyp) 
   (setierr)
   (command "ucs" "w")
   (layer-41)
-  (scale)
+  ;(scale)
   (setvar "dimtad" 1)
   (setq lfac (getvar "DIMLFAC"))
   (prompt "\nSelect chamfer line:")
@@ -398,8 +399,8 @@
   (princ)
 ) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun c:DL (/ os) 
-  (scale)
+(defun c:DL (/ os)  ;添加线性尺寸
+  ;(scale)
   (layer-41)
   (setvar "osmode" 679)
   (setvar "dimtad" 1)
@@ -408,9 +409,9 @@
   (princ)
 ) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun c:DO () 
+(defun c:DO ()  ;添加手动放置坐标尺寸-双向
   (setierr)
-  (scale)
+  ;(scale)
   (layer-41)
   (setvar "osmode" 679)
   (setvar "dimtad" 0)
@@ -420,12 +421,12 @@
   (princ)
 ) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun c:DS () 
+(defun c:DS ()  ;指定尺寸缩放比例
   (command "dimSCALE")
   (princ)
 ) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun c:DT (/ ss) 
+(defun c:DT (/ ss)  ;添加非对称公差
   (setierr)
   (if (setq ss (ssget '((0 . "DIMENSION")))) 
     (if (is-ss-unlocked ss) 
@@ -463,13 +464,13 @@
   (princ)
 ) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun c:DTS () 
+(defun c:DTS ()  ;添加对称值公差
   (setq val (getstring "Enter Tolerance Value {symmetrical}:"))
   (tole7 val val)
   (princ)
 ) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun c:FA (/ ca s en1 en2 p1 p2 p3 p4 tab1 tab2 p-int ca) 
+(defun c:FA (/ ca s en1 en2 p1 p2 p3 p4 tab1 tab2 p-int ca)  ;添加交点
   (setierr)
   (command "ucs" "w")
   (angset)
@@ -506,8 +507,8 @@
   (princ)
 ) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun c:FC () 
-  (SCALE)
+(defun c:FC ()  ;添加直径尺寸
+  ;(SCALE)
   (layer-41)
   (setvar "cmdecho" 1)
   (setvar "dimtad" 1)
@@ -517,7 +518,7 @@
   (PRINC)
 ) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun c:HD (/ str ob tb va b ename) 
+(defun c:HD (/ str ob tb va b ename)  ;添加DEP
   (setierr)
   (if (not (setq b (vl-bb-ref 'hz_d))) 
     (setq b "5")
@@ -550,7 +551,7 @@
   (princ)
 ) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun c:HT (/ str ob tb va b ename) 
+(defun c:HT (/ str ob tb va b ename)  ;添加THR
   (setierr)
   (setq str "THR")
   (while (not (setq ename (entsel))) 
@@ -574,7 +575,7 @@
   (princ)
 ) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun c:HZ (/ str ob tb va b ename) 
+(defun c:HZ (/ str ob tb va b ename)  ;添加深度后缀
   (setierr)
   (if (not (setq b (vl-bb-ref 'hz))) 
     (setq b "ONE WALL")
@@ -622,7 +623,7 @@
   (princ)
 ) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun c:LS (/ part) 
+(defun c:LS (/ part)  ;添加SEE DETAIL
   (setq part (strcase (getstring "Part<A>:")))
   (if (= part "") 
     (setq part "A")
@@ -637,17 +638,17 @@
   (princ)
 ) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun c:M0 () 
+(defun c:M0 ()  ;线型比例/2
   (lt-change "Lessen" 0.5)
   (princ)
 ) ;_ end of defun
 
-(defun c:M2 () 
+(defun c:M2 ()  ;线型比例*2
   (lt-change "Augment" 2)
   (princ)
 ) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun c:MC (/) 
+(defun c:MC (/)  ;添加对称中心线
   (setierr)
   (command "ucs" "w")
   (angset)
@@ -687,7 +688,7 @@
   (princ)
 ) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun c:PCD (/ NAM CIR STR TOH TAD OFL) 
+(defun c:PCD (/ NAM CIR STR TOH TAD OFL)  ;添加P.C.D.标注
   (setierr)
   (layer-41)
   (command "ucs" "w")
@@ -707,7 +708,7 @@
            "dimpost"
            STR
   )
-  (scale)
+  ;(scale)
   (COMMAND "DIMDIAMETER" CIR PAUSE)
   (setvar "cecolor" "bylayer")
   (command "_dimtoh" 
@@ -845,7 +846,7 @@
   (princ)
 ) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun c:REF (/ ob tb va) 
+(defun c:REF (/ ob tb va)  ;变更为参考尺寸
   (setierr)
   (setq ob (car (entsel))
         tb (entget ob)
@@ -867,7 +868,7 @@
   (princ)
 ) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun c:SL (/ DS S1 txt a sc te lfac pt1 pt2 pt3 pt4) 
+(defun c:SL (/ DS S1 txt a sc te lfac pt1 pt2 pt3 pt4)  ;添加SEE DETIAL/SCALE
   (setierr)
   (SETQ S1   (GETVAR "DIMSCALE")
         txt  (getvar "dimtxt")
@@ -910,7 +911,7 @@
   (PRINC)
 ) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun c:ST (/ ss i e_name x_13 y_13 x_14 y_14 pt_14) 
+(defun c:ST (/ ss i e_name x_13 y_13 x_14 y_14 pt_14)  ;拉直坐标标注的尺寸线
   (setierr)
   (if 
     (NOT 
@@ -984,7 +985,7 @@
   (princ)
 ) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun c:T0 (/ sel i) 
+(defun c:T0 (/ sel i)  ;外延尺寸文字位置非水平
   (setierr)
   (if 
     (not 
@@ -1014,7 +1015,7 @@
   (princ)
 ) ;_ end of defun
 
-(defun c:T1 (/ sel) 
+(defun c:T1 (/ sel)  ;外延尺寸文字位置水平
   (setierr)
   (setq i 0)
   (if (setq sel (ssget '((0 . "DIMENSION")))) 
@@ -1033,7 +1034,7 @@
   (princ)
 ) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun c:TE (/ sca) 
+(defun c:TE (/ sca) ;添加文本
   (if (tblsearch "style" "SIMPLEX") 
     (command "style" "SIMPLEX" "" "" "" "" "" "" "")
     (command "style" "SIMPLEX" "SIMPLEX" "" "" "" "" "" "")
