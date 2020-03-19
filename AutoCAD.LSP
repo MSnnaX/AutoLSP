@@ -623,6 +623,249 @@
   (princ)
 ) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;Hole;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun c:KH10 (/) 
+  (setq li-data '((0.040 0)
+                  (0.048 0)
+                  (0.058 0)
+                  (0.070 0)
+                  (0.084 0)
+                  (0.100 0)
+                  (0.120 0)
+                  (0.140 0)
+                  (0.160 0)
+                  (0.185 0)
+                  (0.210 0)
+                  (0.230 0)
+                  (0.250 0)
+                 )
+  ) ;_ end of setq
+  (tolerance_2000 li-data "Deviation")
+  (princ)
+)
+
+(defun c:KH9 (/) 
+  (setq li-data '((0.025 0)
+                  (0.030 0)
+                  (0.036 0)
+                  (0.043 0)
+                  (0.052 0)
+                  (0.062 0)
+                  (0.074 0)
+                  (0.087 0)
+                  (0.100 0)
+                  (0.115 0)
+                  (0.130 0)
+                  (0.140 0)
+                  (0.155 0)
+                 )
+  ) ;_ end of setq
+  (tolerance_2000 li-data "Deviation")
+  (princ)
+)
+
+(defun c:KH8 (/) 
+  (setq li-data '((0.014 0)
+                  (0.018 0)
+                  (0.022 0)
+                  (0.027 0)
+                  (0.033 0)
+                  (0.039 0)
+                  (0.046 0)
+                  (0.054 0)
+                  (0.063 0)
+                  (0.072 0)
+                  (0.081 0)
+                  (0.089 0)
+                  (0.097 0)
+                 )
+  ) ;_ end of setq
+  (tolerance_2000 li-data "Deviation")
+  (princ)
+)
+
+(defun c:KH7 (/) 
+  (setq li-data '((0.01 0)
+                  (0.012 0)
+                  (0.015 0)
+                  (0.018 0)
+                  (0.021 0)
+                  (0.025 0)
+                  (0.03 0)
+                  (0.035 0)
+                  (0.04 0)
+                  (0.046 0)
+                  (0.052 0)
+                  (0.057 0)
+                  (0.063 0)
+                 )
+  ) ;_ end of setq
+  (tolerance_2000 li-data "Deviation")
+  (princ)
+)
+
+(defun c:KG7 (/) 
+  (setq li-data '((0.012 -0.002)
+                  (0.016 -0.004)
+                  (0.020 -0.005)
+                  (0.024 -0.006)
+                  (0.028 -0.007)
+                  (0.034 -0.009)
+                  (0.040 -0.010)
+                  (0.047 -0.012)
+                  (0.054 -0.014)
+                  (0.061 -0.015)
+                  (0.069 -0.017)
+                  (0.075 -0.018)
+                  (0.083 -0.020)
+                 )
+  ) ;_ end of setq
+  (tolerance_2000 li-data "Deviation")
+  (princ)
+)
+
+(defun c:KF7 (/) 
+  (setq li-data '((0.016 -0.006)
+                  (0.022 -0.010)
+                  (0.028 -0.013)
+                  (0.034 -0.016)
+                  (0.041 -0.020)
+                  (0.050 -0.025)
+                  (0.060 -0.030)
+                  (0.071 -0.036)
+                  (0.083 -0.043)
+                  (0.096 -0.05)
+                  (0.108 -0.056)
+                  (0.119 -0.062)
+                  (0.131 -0.068)
+                 )
+  ) ;_ end of setq
+  (tolerance_2000 li-data "Deviation")
+  (princ)
+)
+
+(defun c:ze7 (/) 
+  (setq li-data '((-0.014 0.024)
+                  (-0.020 0.032)
+                  (-0.025 0.040)
+                  (-0.032 0.050)
+                  (-0.040 0.061)
+                  (-0.050 0.075)
+                  (-0.060 0.090)
+                  (-0.072 0.107)
+                  (-0.085 0.125)
+                  (-0.1 0.146)
+                  (-0.11 0.162)
+                  (-0.125 0.182)
+                  (-0.135 0.198)
+                 )
+  ) ;_ end of setq
+  (tolerance_2000 li-data "Deviation")
+  (princ)
+)	
+
+(defun c:zf7 (/) 
+  (setq li-data '((-0.006 0.016)
+                  (-0.010 0.022)
+                  (-0.013 0.028)
+                  (-0.016 0.034)
+                  (-0.02 0.041)
+                  (-0.025 0.05)
+                  (-0.03 0.06)
+                  (-0.036 0.071)
+                  (-0.043 0.083)
+                  (-0.05 0.096)
+                  (-0.056 0.108)
+                  (-0.062 0.119)
+                  (-0.068 0.131)
+                 )
+  ) ;_ end of setq
+  (tolerance_2000 li-data "Deviation")
+  (princ)
+)
+
+;Shaft;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun c:zg6 (/) 
+  (setq li-data '((-0.002 0.008)
+                  (-0.004 0.012)
+                  (-0.005 0.014)
+                  (-0.006 0.017)
+                  (-0.007 0.02)
+                  (-0.009 0.025)
+                  (-0.01 0.029)
+                  (-0.012 0.034)
+                  (-0.014 0.039)
+                  (-0.015 0.044)
+                  (-0.017 0.049)
+                  (-0.018 0.054)
+                  (-0.02 0.06)
+                 )
+  ) ;_ end of setq
+  (tolerance_2000 li-data "Deviation")
+  (princ)
+)
+
+(defun c:zh6 (/) 
+  (setq li-data '((0 0.006)
+                  (0 0.008)
+                  (0 0.009)
+                  (0 0.011)
+                  (0 0.013)
+                  (0 0.016)
+                  (0 0.019)
+                  (0 0.022)
+                  (0 0.025)
+                  (0 0.029)
+                  (0 0.032)
+                  (0 0.036)
+                  (0 0.04)
+                 )
+  ) ;_ end of setq
+  (tolerance_2000 li-data "Deviation")
+  (princ)
+)
+
+(defun c:zk6 (/) 
+  (setq li-data '((0.006 0)
+                  (0.009 -0.001)
+                  (0.01 -0.001)
+                  (0.012 -0.001)
+                  (0.015 -0.002)
+                  (0.018 -0.002)
+                  (0.021 -0.002)
+                  (0.025 -0.003)
+                  (0.028 -0.003)
+                  (0.033 -0.004)
+                  (0.036 -0.004)
+                  (0.04 -0.004)
+                  (0.045 -0.005)
+                 )
+  ) ;_ end of setq
+  (tolerance_2000 li-data "Deviation")
+  (princ)
+)
+
+(defun c:zjs6 (/) 
+  (setq li-data '((0.003)
+                  (0.004)
+                  (0.0045)
+                  (0.0055)
+                  (0.0065)
+                  (0.008)
+                  (0.0095)
+                  (0.011)
+                  (0.0125)
+                  (0.0145)
+                  (0.016)
+                  (0.018)
+                  (0.02)
+                 )
+  ) ;_ end of setq
+  (tolerance_2000 li-data "Symmetrical")
+  (princ)
+)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun c:LS (/ part)  ;添加SEE DETAIL
   (setq part (strcase (getstring "Part<A>:")))
   (if (= part "") 
@@ -1709,6 +1952,112 @@
   ) ;_ end of If
 ) ;_ end of Defun-Q
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun tolerance_2000 (li-data typ / tol vla-obj la) 
+  (setvar "cmdecho" 0)
+  (setvar "osmode" 679)
+  (setq li-cond '(0 3 6 10 18 30 50 80 120 180 250 315 400 500)
+        i       0
+  ) ;_ end of setq
+  (if 
+    (not (setq tol (ssget "_i" '((0 . "DIMENSION"))))  ;_ end of setq
+    ) ;_ end of not
+    (setq tol_nam (car (entsel "\nSelect a Dimension:")))
+    (setq tol_nam (ssname tol 0))
+  ) ;_ end of if
+  (if tol_nam 
+    (progn 
+      (setq la (cdr (assoc 8 (entget tol_nam))))
+      (command "layer" "u" la "")
+      (setierr)
+      (command "move" tol_nam "" "0,0" "0,0.01")
+      (command "move" "p" "" "0,0" "0,-0.01")
+      (reerr)
+      (vl-load-com)
+      (setq vla-obj (vlax-ename->vla-object 
+                      tol_nam
+                    ) ;_ end of vlax-ename->vla-object
+            tol_num (vla-get-Measurement vla-obj)
+      ) ;_ end of setq
+      (repeat (length li-data) 
+        (if 
+          (and (> tol_num (nth i li-cond)) 
+               (<= tol_num (nth (1+ i) li-cond))
+          ) ;_ end of and
+          (if (= typ "Deviation") 
+            (tole2 
+              (car (nth i li-data))
+              (cadr (nth i li-data))
+              tol_nam
+            ) ;_ end of tole2
+            (tole3 (car (nth i li-data)) tol_nam)
+          ) ;_ end of if
+        ) ;_ end of if
+        (setq i (1+ i))
+      ) ;_ end of repeat
+      (if (> tol_num (last li-cond)) 
+        (alert "\nRange out!")
+      ) ;_ end of if
+    ) ;_ end of progn
+    (alert "No selection!")
+  ) ;_ end of if
+) ;_ end of defun
+
+(defun tole2 (up low di) 
+  (setvar "cmdecho" 0)
+  (command "dimoverride" 
+           "dimdec"
+           "3"
+           "dimzin"
+           "8"
+           "dimtdec"
+           "3"
+           "dimtzin"
+           "8"
+           "dimtol"
+           "on"
+           "dimtfac"
+           "0.7"
+           "dimtp"
+           up
+           "dimtm"
+           low
+           ""
+           di
+           ""
+  ) ;_ end of command
+  (setvar "cmdecho" 1)
+  (princ)
+) ;_ end of defun
+
+(defun tole3 (va di) 
+  (setvar "cmdecho" 0)
+  (command "dimoverride" 
+           "dimdec"
+           "3"
+           "dimzin"
+           "8"
+           "dimtdec"
+           "3"
+           "dimtzin"
+           "8"
+           "dimtol"
+           "on"
+           "dimtoh"
+           "on"
+           "dimtfac"
+           "0.7"
+           "dimtp"
+           va
+           "dimtm"
+           va
+           ""
+           di
+           ""
+  ) ;_ end of command
+  (setvar "cmdecho" 1)
+  (princ)
+) ;_ end of defun
+
 (defun tole7 (up low / di c) 
   (setierr)
   (if (setq di (ssget '((0 . "DIMENSION")))) 
