@@ -1034,7 +1034,7 @@
   (princ)
 ) ;_ end of defun
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun c:TE (/ sca) ;添加文本
+(defun c:TE (/ sca)  ;添加文本
   (if (tblsearch "style" "SIMPLEX") 
     (command "style" "SIMPLEX" "" "" "" "" "" "" "")
     (command "style" "SIMPLEX" "SIMPLEX" "" "" "" "" "" "")
@@ -1048,6 +1048,100 @@
   ) ;_ end of setq
   (COMMAND "_text" PAUSE sca "0" "Detail 1:1")
   (COMMAND "_ddedit" "L" "")
+  (reerr)
+  (princ)
+) ;_ end of defun
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun c:UU (/ op h sc dis i nam v-nam ang p1 p2 i pt-h pt-v ss-line auto dec ZIN)  ;指定坐标原点并开始标注
+  (setierr)
+  ;(scale)
+  (layer-41)
+  (command "ucs" "w")
+  (setvar "osmode" 32)
+  (setq op  (getpoint "\nSelect Specify new origin point :")
+        dec (getvar "dimdec")
+        ZIN (GETVAR "DIMZIN")
+  ) ;_ end of setq
+  (setvar "osmode" 0)
+  (if 
+    (setq ss-line (ssget "c" 
+                         (polar op (* 1.25 pi) 0.1)
+                         (polar op (* 0.25 pi) 0.1)
+                         '((0 . "LINE"))
+                  ) ;_ end of ssget
+    ) ;_ end of setq
+    (progn 
+      (setq h   (getvar "dimtxt")
+            sc  (getvar "dimscale")
+            dis (atof (rtos (* h sc 2.5 1.5) 2 1))
+            i   0
+      ) ;_ end of setq
+      (repeat (sslength ss-line) 
+        (setq nam   (ssname ss-line i)
+              v-nam (vlax-ename->vla-object nam)
+              ang   (angtos (vla-get-angle v-nam) 0 0)
+              p1    (line-start-point nam)
+              p2    (line-end-point nam)
+              i     (1+ i)
+        ) ;_ end of setq
+        (cond 
+          ((or (= ang "0") (= ang "180"))
+           (cond 
+             ((equal p1 op 0.001) (setq pt-h p2))
+             ((equal p2 op 0.001) (setq pt-h p1))
+           ) ;_ end of cond
+          )
+          ((or (= ang "90") (= ang "270"))
+           (cond 
+             ((equal p1 op 0.001) (setq pt-v p2))
+             ((equal p2 op 0.001) (setq pt-v p1))
+           ) ;_ end of cond
+          )
+        ) ;_ end of cond
+      ) ;_ end of repeat
+      (if (and pt-v pt-h) 
+        (progn 
+          (setvar "osmode" 679)
+          (setvar "dimtad" 0)
+          (setvar "DIMDEC" 0)
+          (setvar "DIMZIN" 8)
+          (command "ucs" 
+                   "o"
+                   op
+                   "DIMORDINATE"
+                   "0,0"
+                   (polar (list 0 0) (angle pt-h op) dis)
+                   "DIMORDINATE"
+                   "0,0"
+                   (polar (list 0 0) (angle pt-v op) dis)
+          )
+          (setvar "DIMDEC" dec)
+          (setvar "DIMZIN" ZIN)
+          (command "dimbaseline")
+          (setq auto t)
+        ) ;_ end of progn
+        (setq auto nil)
+      ) ;_ end of if
+    ) ;_ end of progn
+  ) ;_ end of if
+  (if (not auto) 
+    (progn 
+      (setvar "osmode" 679)
+      (setvar "DIMDEC" 0)
+      (command "ucs" 
+               "o"
+               op
+               "DIMORDINATE"
+               "0,0"
+               pause
+               "DIMORDINATE"
+               "0,0"
+               pause
+      )
+      (setvar "DIMDEC" dec)
+      (command "dimbaseline")
+    ) ;_ end of progn
+  ) ;_ end of if
   (reerr)
   (princ)
 ) ;_ end of defun
